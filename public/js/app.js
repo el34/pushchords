@@ -2090,6 +2090,3635 @@ var n,e=(n=__webpack_require__(/*! nprogress */ "./node_modules/nprogress/nprogr
 
 /***/ }),
 
+/***/ "./node_modules/@tonaljs/abc-notation/dist/index.es.js":
+/*!*************************************************************!*\
+  !*** ./node_modules/@tonaljs/abc-notation/dist/index.es.js ***!
+  \*************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "abcToScientificNotation": () => (/* binding */ abcToScientificNotation),
+/* harmony export */   "default": () => (/* binding */ index),
+/* harmony export */   "distance": () => (/* binding */ distance),
+/* harmony export */   "scientificToAbcNotation": () => (/* binding */ scientificToAbcNotation),
+/* harmony export */   "tokenize": () => (/* binding */ tokenize),
+/* harmony export */   "transpose": () => (/* binding */ transpose)
+/* harmony export */ });
+/* harmony import */ var _tonaljs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tonaljs/core */ "./node_modules/@tonaljs/core/dist/index.es.js");
+
+
+const fillStr = (character, times) => Array(times + 1).join(character);
+const REGEX = /^(_{1,}|=|\^{1,}|)([abcdefgABCDEFG])([,']*)$/;
+function tokenize(str) {
+    const m = REGEX.exec(str);
+    if (!m) {
+        return ["", "", ""];
+    }
+    return [m[1], m[2], m[3]];
+}
+/**
+ * Convert a (string) note in ABC notation into a (string) note in scientific notation
+ *
+ * @example
+ * abcToScientificNotation("c") // => "C5"
+ */
+function abcToScientificNotation(str) {
+    const [acc, letter, oct] = tokenize(str);
+    if (letter === "") {
+        return "";
+    }
+    let o = 4;
+    for (let i = 0; i < oct.length; i++) {
+        o += oct.charAt(i) === "," ? -1 : 1;
+    }
+    const a = acc[0] === "_"
+        ? acc.replace(/_/g, "b")
+        : acc[0] === "^"
+            ? acc.replace(/\^/g, "#")
+            : "";
+    return letter.charCodeAt(0) > 96
+        ? letter.toUpperCase() + a + (o + 1)
+        : letter + a + o;
+}
+/**
+ * Convert a (string) note in scientific notation into a (string) note in ABC notation
+ *
+ * @example
+ * scientificToAbcNotation("C#4") // => "^C"
+ */
+function scientificToAbcNotation(str) {
+    const n = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.note)(str);
+    if (n.empty || (!n.oct && n.oct !== 0)) {
+        return "";
+    }
+    const { letter, acc, oct } = n;
+    const a = acc[0] === "b" ? acc.replace(/b/g, "_") : acc.replace(/#/g, "^");
+    const l = oct > 4 ? letter.toLowerCase() : letter;
+    const o = oct === 5 ? "" : oct > 4 ? fillStr("'", oct - 5) : fillStr(",", 4 - oct);
+    return a + l + o;
+}
+function transpose(note, interval) {
+    return scientificToAbcNotation((0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.transpose)(abcToScientificNotation(note), interval));
+}
+function distance(from, to) {
+    return (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.distance)(abcToScientificNotation(from), abcToScientificNotation(to));
+}
+var index = {
+    abcToScientificNotation,
+    scientificToAbcNotation,
+    tokenize,
+    transpose,
+    distance,
+};
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/array/dist/index.es.js":
+/*!******************************************************!*\
+  !*** ./node_modules/@tonaljs/array/dist/index.es.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "compact": () => (/* binding */ compact),
+/* harmony export */   "permutations": () => (/* binding */ permutations),
+/* harmony export */   "range": () => (/* binding */ range),
+/* harmony export */   "rotate": () => (/* binding */ rotate),
+/* harmony export */   "shuffle": () => (/* binding */ shuffle),
+/* harmony export */   "sortedNoteNames": () => (/* binding */ sortedNoteNames),
+/* harmony export */   "sortedUniqNoteNames": () => (/* binding */ sortedUniqNoteNames)
+/* harmony export */ });
+/* harmony import */ var _tonaljs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tonaljs/core */ "./node_modules/@tonaljs/core/dist/index.es.js");
+
+
+// ascending range
+function ascR(b, n) {
+    const a = [];
+    // tslint:disable-next-line:curly
+    for (; n--; a[n] = n + b)
+        ;
+    return a;
+}
+// descending range
+function descR(b, n) {
+    const a = [];
+    // tslint:disable-next-line:curly
+    for (; n--; a[n] = b - n)
+        ;
+    return a;
+}
+/**
+ * Creates a numeric range
+ *
+ * @param {number} from
+ * @param {number} to
+ * @return {Array<number>}
+ *
+ * @example
+ * range(-2, 2) // => [-2, -1, 0, 1, 2]
+ * range(2, -2) // => [2, 1, 0, -1, -2]
+ */
+function range(from, to) {
+    return from < to ? ascR(from, to - from + 1) : descR(from, from - to + 1);
+}
+/**
+ * Rotates a list a number of times. It"s completly agnostic about the
+ * contents of the list.
+ *
+ * @param {Integer} times - the number of rotations
+ * @param {Array} array
+ * @return {Array} the rotated array
+ *
+ * @example
+ * rotate(1, [1, 2, 3]) // => [2, 3, 1]
+ */
+function rotate(times, arr) {
+    const len = arr.length;
+    const n = ((times % len) + len) % len;
+    return arr.slice(n, len).concat(arr.slice(0, n));
+}
+/**
+ * Return a copy of the array with the null values removed
+ * @function
+ * @param {Array} array
+ * @return {Array}
+ *
+ * @example
+ * compact(["a", "b", null, "c"]) // => ["a", "b", "c"]
+ */
+function compact(arr) {
+    return arr.filter((n) => n === 0 || n);
+}
+/**
+ * Sort an array of notes in ascending order. Pitch classes are listed
+ * before notes. Any string that is not a note is removed.
+ *
+ * @param {string[]} notes
+ * @return {string[]} sorted array of notes
+ *
+ * @example
+ * sortedNoteNames(['c2', 'c5', 'c1', 'c0', 'c6', 'c'])
+ * // => ['C', 'C0', 'C1', 'C2', 'C5', 'C6']
+ * sortedNoteNames(['c', 'F', 'G', 'a', 'b', 'h', 'J'])
+ * // => ['C', 'F', 'G', 'A', 'B']
+ */
+function sortedNoteNames(notes) {
+    const valid = notes.map((n) => (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.note)(n)).filter((n) => !n.empty);
+    return valid.sort((a, b) => a.height - b.height).map((n) => n.name);
+}
+/**
+ * Get sorted notes with duplicates removed. Pitch classes are listed
+ * before notes.
+ *
+ * @function
+ * @param {string[]} array
+ * @return {string[]} unique sorted notes
+ *
+ * @example
+ * Array.sortedUniqNoteNames(['a', 'b', 'c2', '1p', 'p2', 'c2', 'b', 'c', 'c3' ])
+ * // => [ 'C', 'A', 'B', 'C2', 'C3' ]
+ */
+function sortedUniqNoteNames(arr) {
+    return sortedNoteNames(arr).filter((n, i, a) => i === 0 || n !== a[i - 1]);
+}
+/**
+ * Randomizes the order of the specified array in-place, using the Fisher–Yates shuffle.
+ *
+ * @function
+ * @param {Array} array
+ * @return {Array} the array shuffled
+ *
+ * @example
+ * shuffle(["C", "D", "E", "F"]) // => [...]
+ */
+function shuffle(arr, rnd = Math.random) {
+    let i;
+    let t;
+    let m = arr.length;
+    while (m) {
+        i = Math.floor(rnd() * m--);
+        t = arr[m];
+        arr[m] = arr[i];
+        arr[i] = t;
+    }
+    return arr;
+}
+/**
+ * Get all permutations of an array
+ *
+ * @param {Array} array - the array
+ * @return {Array<Array>} an array with all the permutations
+ * @example
+ * permutations(["a", "b", "c"])) // =>
+ * [
+ *   ["a", "b", "c"],
+ *   ["b", "a", "c"],
+ *   ["b", "c", "a"],
+ *   ["a", "c", "b"],
+ *   ["c", "a", "b"],
+ *   ["c", "b", "a"]
+ * ]
+ */
+function permutations(arr) {
+    if (arr.length === 0) {
+        return [[]];
+    }
+    return permutations(arr.slice(1)).reduce((acc, perm) => {
+        return acc.concat(arr.map((e, pos) => {
+            const newPerm = perm.slice();
+            newPerm.splice(pos, 0, arr[0]);
+            return newPerm;
+        }));
+    }, []);
+}
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/chord-detect/dist/index.es.js":
+/*!*************************************************************!*\
+  !*** ./node_modules/@tonaljs/chord-detect/dist/index.es.js ***!
+  \*************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ index),
+/* harmony export */   "detect": () => (/* binding */ detect)
+/* harmony export */ });
+/* harmony import */ var _tonaljs_chord_type__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tonaljs/chord-type */ "./node_modules/@tonaljs/chord-type/dist/index.es.js");
+/* harmony import */ var _tonaljs_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tonaljs/core */ "./node_modules/@tonaljs/core/dist/index.es.js");
+/* harmony import */ var _tonaljs_pcset__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @tonaljs/pcset */ "./node_modules/@tonaljs/pcset/dist/index.es.js");
+
+
+
+
+const namedSet = (notes) => {
+    const pcToName = notes.reduce((record, n) => {
+        const chroma = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.note)(n).chroma;
+        if (chroma !== undefined) {
+            record[chroma] = record[chroma] || (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.note)(n).name;
+        }
+        return record;
+    }, {});
+    return (chroma) => pcToName[chroma];
+};
+function detect(source) {
+    const notes = source.map((n) => (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.note)(n).pc).filter((x) => x);
+    if (_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.note.length === 0) {
+        return [];
+    }
+    const found = findExactMatches(notes, 1);
+    return found
+        .filter((chord) => chord.weight)
+        .sort((a, b) => b.weight - a.weight)
+        .map((chord) => chord.name);
+}
+function findExactMatches(notes, weight) {
+    const tonic = notes[0];
+    const tonicChroma = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.note)(tonic).chroma;
+    const noteName = namedSet(notes);
+    // we need to test all chormas to get the correct baseNote
+    const allModes = (0,_tonaljs_pcset__WEBPACK_IMPORTED_MODULE_2__.modes)(notes, false);
+    const found = [];
+    allModes.forEach((mode, index) => {
+        // some chords could have the same chroma but different interval spelling
+        const chordTypes = (0,_tonaljs_chord_type__WEBPACK_IMPORTED_MODULE_0__.all)().filter((chordType) => chordType.chroma === mode);
+        chordTypes.forEach((chordType) => {
+            const chordName = chordType.aliases[0];
+            const baseNote = noteName(index);
+            const isInversion = index !== tonicChroma;
+            if (isInversion) {
+                found.push({
+                    weight: 0.5 * weight,
+                    name: `${baseNote}${chordName}/${tonic}`,
+                });
+            }
+            else {
+                found.push({ weight: 1 * weight, name: `${baseNote}${chordName}` });
+            }
+        });
+    });
+    return found;
+}
+var index = { detect };
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/chord-type/dist/index.es.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/@tonaljs/chord-type/dist/index.es.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "add": () => (/* binding */ add),
+/* harmony export */   "addAlias": () => (/* binding */ addAlias),
+/* harmony export */   "all": () => (/* binding */ all),
+/* harmony export */   "chordType": () => (/* binding */ chordType),
+/* harmony export */   "default": () => (/* binding */ index$1),
+/* harmony export */   "entries": () => (/* binding */ entries),
+/* harmony export */   "get": () => (/* binding */ get),
+/* harmony export */   "keys": () => (/* binding */ keys),
+/* harmony export */   "names": () => (/* binding */ names),
+/* harmony export */   "removeAll": () => (/* binding */ removeAll),
+/* harmony export */   "symbols": () => (/* binding */ symbols)
+/* harmony export */ });
+/* harmony import */ var _tonaljs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tonaljs/core */ "./node_modules/@tonaljs/core/dist/index.es.js");
+/* harmony import */ var _tonaljs_pcset__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tonaljs/pcset */ "./node_modules/@tonaljs/pcset/dist/index.es.js");
+
+
+
+/**
+ * @private
+ * Chord List
+ * Source: https://en.wikibooks.org/wiki/Music_Theory/Complete_List_of_Chord_Patterns
+ * Format: ["intervals", "full name", "abrv1 abrv2"]
+ */
+const CHORDS = [
+    // ==Major==
+    ["1P 3M 5P", "major", "M ^ "],
+    ["1P 3M 5P 7M", "major seventh", "maj7 Δ ma7 M7 Maj7 ^7"],
+    ["1P 3M 5P 7M 9M", "major ninth", "maj9 Δ9 ^9"],
+    ["1P 3M 5P 7M 9M 13M", "major thirteenth", "maj13 Maj13 ^13"],
+    ["1P 3M 5P 6M", "sixth", "6 add6 add13 M6"],
+    ["1P 3M 5P 6M 9M", "sixth/ninth", "6/9 69 M69"],
+    ["1P 3M 6m 7M", "major seventh flat sixth", "M7b6 ^7b6"],
+    [
+        "1P 3M 5P 7M 11A",
+        "major seventh sharp eleventh",
+        "maj#4 Δ#4 Δ#11 M7#11 ^7#11 maj7#11",
+    ],
+    // ==Minor==
+    // '''Normal'''
+    ["1P 3m 5P", "minor", "m min -"],
+    ["1P 3m 5P 7m", "minor seventh", "m7 min7 mi7 -7"],
+    [
+        "1P 3m 5P 7M",
+        "minor/major seventh",
+        "m/ma7 m/maj7 mM7 mMaj7 m/M7 -Δ7 mΔ -^7",
+    ],
+    ["1P 3m 5P 6M", "minor sixth", "m6 -6"],
+    ["1P 3m 5P 7m 9M", "minor ninth", "m9 -9"],
+    ["1P 3m 5P 7M 9M", "minor/major ninth", "mM9 mMaj9 -^9"],
+    ["1P 3m 5P 7m 9M 11P", "minor eleventh", "m11 -11"],
+    ["1P 3m 5P 7m 9M 13M", "minor thirteenth", "m13 -13"],
+    // '''Diminished'''
+    ["1P 3m 5d", "diminished", "dim ° o"],
+    ["1P 3m 5d 7d", "diminished seventh", "dim7 °7 o7"],
+    ["1P 3m 5d 7m", "half-diminished", "m7b5 ø -7b5 h7 h"],
+    // ==Dominant/Seventh==
+    // '''Normal'''
+    ["1P 3M 5P 7m", "dominant seventh", "7 dom"],
+    ["1P 3M 5P 7m 9M", "dominant ninth", "9"],
+    ["1P 3M 5P 7m 9M 13M", "dominant thirteenth", "13"],
+    ["1P 3M 5P 7m 11A", "lydian dominant seventh", "7#11 7#4"],
+    // '''Altered'''
+    ["1P 3M 5P 7m 9m", "dominant flat ninth", "7b9"],
+    ["1P 3M 5P 7m 9A", "dominant sharp ninth", "7#9"],
+    ["1P 3M 7m 9m", "altered", "alt7"],
+    // '''Suspended'''
+    ["1P 4P 5P", "suspended fourth", "sus4 sus"],
+    ["1P 2M 5P", "suspended second", "sus2"],
+    ["1P 4P 5P 7m", "suspended fourth seventh", "7sus4 7sus"],
+    ["1P 5P 7m 9M 11P", "eleventh", "11"],
+    [
+        "1P 4P 5P 7m 9m",
+        "suspended fourth flat ninth",
+        "b9sus phryg 7b9sus 7b9sus4",
+    ],
+    // ==Other==
+    ["1P 5P", "fifth", "5"],
+    ["1P 3M 5A", "augmented", "aug + +5 ^#5"],
+    ["1P 3m 5A", "minor augmented", "m#5 -#5 m+"],
+    ["1P 3M 5A 7M", "augmented seventh", "maj7#5 maj7+5 +maj7 ^7#5"],
+    [
+        "1P 3M 5P 7M 9M 11A",
+        "major sharp eleventh (lydian)",
+        "maj9#11 Δ9#11 ^9#11",
+    ],
+    // ==Legacy==
+    ["1P 2M 4P 5P", "", "sus24 sus4add9"],
+    ["1P 3M 5A 7M 9M", "", "maj9#5 Maj9#5"],
+    ["1P 3M 5A 7m", "", "7#5 +7 7+ 7aug aug7"],
+    ["1P 3M 5A 7m 9A", "", "7#5#9 7#9#5 7alt"],
+    ["1P 3M 5A 7m 9M", "", "9#5 9+"],
+    ["1P 3M 5A 7m 9M 11A", "", "9#5#11"],
+    ["1P 3M 5A 7m 9m", "", "7#5b9 7b9#5"],
+    ["1P 3M 5A 7m 9m 11A", "", "7#5b9#11"],
+    ["1P 3M 5A 9A", "", "+add#9"],
+    ["1P 3M 5A 9M", "", "M#5add9 +add9"],
+    ["1P 3M 5P 6M 11A", "", "M6#11 M6b5 6#11 6b5"],
+    ["1P 3M 5P 6M 7M 9M", "", "M7add13"],
+    ["1P 3M 5P 6M 9M 11A", "", "69#11"],
+    ["1P 3m 5P 6M 9M", "", "m69 -69"],
+    ["1P 3M 5P 6m 7m", "", "7b6"],
+    ["1P 3M 5P 7M 9A 11A", "", "maj7#9#11"],
+    ["1P 3M 5P 7M 9M 11A 13M", "", "M13#11 maj13#11 M13+4 M13#4"],
+    ["1P 3M 5P 7M 9m", "", "M7b9"],
+    ["1P 3M 5P 7m 11A 13m", "", "7#11b13 7b5b13"],
+    ["1P 3M 5P 7m 13M", "", "7add6 67 7add13"],
+    ["1P 3M 5P 7m 9A 11A", "", "7#9#11 7b5#9 7#9b5"],
+    ["1P 3M 5P 7m 9A 11A 13M", "", "13#9#11"],
+    ["1P 3M 5P 7m 9A 11A 13m", "", "7#9#11b13"],
+    ["1P 3M 5P 7m 9A 13M", "", "13#9"],
+    ["1P 3M 5P 7m 9A 13m", "", "7#9b13"],
+    ["1P 3M 5P 7m 9M 11A", "", "9#11 9+4 9#4"],
+    ["1P 3M 5P 7m 9M 11A 13M", "", "13#11 13+4 13#4"],
+    ["1P 3M 5P 7m 9M 11A 13m", "", "9#11b13 9b5b13"],
+    ["1P 3M 5P 7m 9m 11A", "", "7b9#11 7b5b9 7b9b5"],
+    ["1P 3M 5P 7m 9m 11A 13M", "", "13b9#11"],
+    ["1P 3M 5P 7m 9m 11A 13m", "", "7b9b13#11 7b9#11b13 7b5b9b13"],
+    ["1P 3M 5P 7m 9m 13M", "", "13b9"],
+    ["1P 3M 5P 7m 9m 13m", "", "7b9b13"],
+    ["1P 3M 5P 7m 9m 9A", "", "7b9#9"],
+    ["1P 3M 5P 9M", "", "Madd9 2 add9 add2"],
+    ["1P 3M 5P 9m", "", "Maddb9"],
+    ["1P 3M 5d", "", "Mb5"],
+    ["1P 3M 5d 6M 7m 9M", "", "13b5"],
+    ["1P 3M 5d 7M", "", "M7b5"],
+    ["1P 3M 5d 7M 9M", "", "M9b5"],
+    ["1P 3M 5d 7m", "", "7b5"],
+    ["1P 3M 5d 7m 9M", "", "9b5"],
+    ["1P 3M 7m", "", "7no5"],
+    ["1P 3M 7m 13m", "", "7b13"],
+    ["1P 3M 7m 9M", "", "9no5"],
+    ["1P 3M 7m 9M 13M", "", "13no5"],
+    ["1P 3M 7m 9M 13m", "", "9b13"],
+    ["1P 3m 4P 5P", "", "madd4"],
+    ["1P 3m 5P 6m 7M", "", "mMaj7b6"],
+    ["1P 3m 5P 6m 7M 9M", "", "mMaj9b6"],
+    ["1P 3m 5P 7m 11P", "", "m7add11 m7add4"],
+    ["1P 3m 5P 9M", "", "madd9"],
+    ["1P 3m 5d 6M 7M", "", "o7M7"],
+    ["1P 3m 5d 7M", "", "oM7"],
+    ["1P 3m 6m 7M", "", "mb6M7"],
+    ["1P 3m 6m 7m", "", "m7#5"],
+    ["1P 3m 6m 7m 9M", "", "m9#5"],
+    ["1P 3m 5A 7m 9M 11P", "", "m11A"],
+    ["1P 3m 6m 9m", "", "mb6b9"],
+    ["1P 2M 3m 5d 7m", "", "m9b5"],
+    ["1P 4P 5A 7M", "", "M7#5sus4"],
+    ["1P 4P 5A 7M 9M", "", "M9#5sus4"],
+    ["1P 4P 5A 7m", "", "7#5sus4"],
+    ["1P 4P 5P 7M", "", "M7sus4"],
+    ["1P 4P 5P 7M 9M", "", "M9sus4"],
+    ["1P 4P 5P 7m 9M", "", "9sus4 9sus"],
+    ["1P 4P 5P 7m 9M 13M", "", "13sus4 13sus"],
+    ["1P 4P 5P 7m 9m 13m", "", "7sus4b9b13 7b9b13sus4"],
+    ["1P 4P 7m 10m", "", "4 quartal"],
+    ["1P 5P 7m 9m 11P", "", "11b9"],
+];
+
+const NoChordType = {
+    ..._tonaljs_pcset__WEBPACK_IMPORTED_MODULE_1__.EmptyPcset,
+    name: "",
+    quality: "Unknown",
+    intervals: [],
+    aliases: [],
+};
+let dictionary = [];
+let index = {};
+/**
+ * Given a chord name or chroma, return the chord properties
+ * @param {string} source - chord name or pitch class set chroma
+ * @example
+ * import { get } from 'tonaljs/chord-type'
+ * get('major') // => { name: 'major', ... }
+ */
+function get(type) {
+    return index[type] || NoChordType;
+}
+const chordType = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.deprecate)("ChordType.chordType", "ChordType.get", get);
+/**
+ * Get all chord (long) names
+ */
+function names() {
+    return dictionary.map((chord) => chord.name).filter((x) => x);
+}
+/**
+ * Get all chord symbols
+ */
+function symbols() {
+    return dictionary.map((chord) => chord.aliases[0]).filter((x) => x);
+}
+/**
+ * Keys used to reference chord types
+ */
+function keys() {
+    return Object.keys(index);
+}
+/**
+ * Return a list of all chord types
+ */
+function all() {
+    return dictionary.slice();
+}
+const entries = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.deprecate)("ChordType.entries", "ChordType.all", all);
+/**
+ * Clear the dictionary
+ */
+function removeAll() {
+    dictionary = [];
+    index = {};
+}
+/**
+ * Add a chord to the dictionary.
+ * @param intervals
+ * @param aliases
+ * @param [fullName]
+ */
+function add(intervals, aliases, fullName) {
+    const quality = getQuality(intervals);
+    const chord = {
+        ...(0,_tonaljs_pcset__WEBPACK_IMPORTED_MODULE_1__.get)(intervals),
+        name: fullName || "",
+        quality,
+        intervals,
+        aliases,
+    };
+    dictionary.push(chord);
+    if (chord.name) {
+        index[chord.name] = chord;
+    }
+    index[chord.setNum] = chord;
+    index[chord.chroma] = chord;
+    chord.aliases.forEach((alias) => addAlias(chord, alias));
+}
+function addAlias(chord, alias) {
+    index[alias] = chord;
+}
+function getQuality(intervals) {
+    const has = (interval) => intervals.indexOf(interval) !== -1;
+    return has("5A")
+        ? "Augmented"
+        : has("3M")
+            ? "Major"
+            : has("5d")
+                ? "Diminished"
+                : has("3m")
+                    ? "Minor"
+                    : "Unknown";
+}
+CHORDS.forEach(([ivls, fullName, names]) => add(ivls.split(" "), names.split(" "), fullName));
+dictionary.sort((a, b) => a.setNum - b.setNum);
+var index$1 = {
+    names,
+    symbols,
+    get,
+    all,
+    add,
+    removeAll,
+    keys,
+    // deprecated
+    entries,
+    chordType,
+};
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/chord/dist/index.es.js":
+/*!******************************************************!*\
+  !*** ./node_modules/@tonaljs/chord/dist/index.es.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "chord": () => (/* binding */ chord),
+/* harmony export */   "chordScales": () => (/* binding */ chordScales),
+/* harmony export */   "default": () => (/* binding */ index),
+/* harmony export */   "detect": () => (/* reexport safe */ _tonaljs_chord_detect__WEBPACK_IMPORTED_MODULE_0__.detect),
+/* harmony export */   "extended": () => (/* binding */ extended),
+/* harmony export */   "get": () => (/* binding */ get),
+/* harmony export */   "getChord": () => (/* binding */ getChord),
+/* harmony export */   "reduced": () => (/* binding */ reduced),
+/* harmony export */   "tokenize": () => (/* binding */ tokenize),
+/* harmony export */   "transpose": () => (/* binding */ transpose)
+/* harmony export */ });
+/* harmony import */ var _tonaljs_chord_detect__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tonaljs/chord-detect */ "./node_modules/@tonaljs/chord-detect/dist/index.es.js");
+/* harmony import */ var _tonaljs_chord_type__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tonaljs/chord-type */ "./node_modules/@tonaljs/chord-type/dist/index.es.js");
+/* harmony import */ var _tonaljs_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @tonaljs/core */ "./node_modules/@tonaljs/core/dist/index.es.js");
+/* harmony import */ var _tonaljs_pcset__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @tonaljs/pcset */ "./node_modules/@tonaljs/pcset/dist/index.es.js");
+/* harmony import */ var _tonaljs_scale_type__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @tonaljs/scale-type */ "./node_modules/@tonaljs/scale-type/dist/index.es.js");
+
+
+
+
+
+
+
+const NoChord = {
+    empty: true,
+    name: "",
+    symbol: "",
+    root: "",
+    rootDegree: 0,
+    type: "",
+    tonic: null,
+    setNum: NaN,
+    quality: "Unknown",
+    chroma: "",
+    normalized: "",
+    aliases: [],
+    notes: [],
+    intervals: [],
+};
+// 6, 64, 7, 9, 11 and 13 are consider part of the chord
+// (see https://github.com/danigb/tonal/issues/55)
+const NUM_TYPES = /^(6|64|7|9|11|13)$/;
+/**
+ * Tokenize a chord name. It returns an array with the tonic and chord type
+ * If not tonic is found, all the name is considered the chord name.
+ *
+ * This function does NOT check if the chord type exists or not. It only tries
+ * to split the tonic and chord type.
+ *
+ * @function
+ * @param {string} name - the chord name
+ * @return {Array} an array with [tonic, type]
+ * @example
+ * tokenize("Cmaj7") // => [ "C", "maj7" ]
+ * tokenize("C7") // => [ "C", "7" ]
+ * tokenize("mMaj7") // => [ null, "mMaj7" ]
+ * tokenize("Cnonsense") // => [ null, "nonsense" ]
+ */
+function tokenize(name) {
+    const [letter, acc, oct, type] = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.tokenizeNote)(name);
+    if (letter === "") {
+        return ["", name];
+    }
+    // aug is augmented (see https://github.com/danigb/tonal/issues/55)
+    if (letter === "A" && type === "ug") {
+        return ["", "aug"];
+    }
+    // see: https://github.com/tonaljs/tonal/issues/70
+    if (!type && (oct === "4" || oct === "5")) {
+        return [letter + acc, oct];
+    }
+    if (NUM_TYPES.test(oct)) {
+        return [letter + acc, oct + type];
+    }
+    else {
+        return [letter + acc + oct, type];
+    }
+}
+/**
+ * Get a Chord from a chord name.
+ */
+function get(src) {
+    if (src === "") {
+        return NoChord;
+    }
+    if (Array.isArray(src) && src.length === 2) {
+        return getChord(src[1], src[0]);
+    }
+    else {
+        const [tonic, type] = tokenize(src);
+        const chord = getChord(type, tonic);
+        return chord.empty ? getChord(src) : chord;
+    }
+}
+/**
+ * Get chord properties
+ *
+ * @param typeName - the chord type name
+ * @param [tonic] - Optional tonic
+ * @param [root]  - Optional root (requires a tonic)
+ */
+function getChord(typeName, optionalTonic, optionalRoot) {
+    const type = (0,_tonaljs_chord_type__WEBPACK_IMPORTED_MODULE_1__.get)(typeName);
+    const tonic = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.note)(optionalTonic || "");
+    const root = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.note)(optionalRoot || "");
+    if (type.empty ||
+        (optionalTonic && tonic.empty) ||
+        (optionalRoot && root.empty)) {
+        return NoChord;
+    }
+    const rootInterval = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.distance)(tonic.pc, root.pc);
+    const rootDegree = type.intervals.indexOf(rootInterval) + 1;
+    if (!root.empty && !rootDegree) {
+        return NoChord;
+    }
+    const intervals = Array.from(type.intervals);
+    for (let i = 1; i < rootDegree; i++) {
+        const num = intervals[0][0];
+        const quality = intervals[0][1];
+        const newNum = parseInt(num, 10) + 7;
+        intervals.push(`${newNum}${quality}`);
+        intervals.shift();
+    }
+    const notes = tonic.empty
+        ? []
+        : intervals.map((i) => (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.transpose)(tonic, i));
+    typeName = type.aliases.indexOf(typeName) !== -1 ? typeName : type.aliases[0];
+    const symbol = `${tonic.empty ? "" : tonic.pc}${typeName}${root.empty || rootDegree <= 1 ? "" : "/" + root.pc}`;
+    const name = `${optionalTonic ? tonic.pc + " " : ""}${type.name}${rootDegree > 1 && optionalRoot ? " over " + root.pc : ""}`;
+    return {
+        ...type,
+        name,
+        symbol,
+        type: type.name,
+        root: root.name,
+        intervals,
+        rootDegree,
+        tonic: tonic.name,
+        notes,
+    };
+}
+const chord = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.deprecate)("Chord.chord", "Chord.get", get);
+/**
+ * Transpose a chord name
+ *
+ * @param {string} chordName - the chord name
+ * @return {string} the transposed chord
+ *
+ * @example
+ * transpose('Dm7', 'P4') // => 'Gm7
+ */
+function transpose(chordName, interval) {
+    const [tonic, type] = tokenize(chordName);
+    if (!tonic) {
+        return chordName;
+    }
+    return (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.transpose)(tonic, interval) + type;
+}
+/**
+ * Get all scales where the given chord fits
+ *
+ * @example
+ * chordScales('C7b9')
+ * // => ["phrygian dominant", "flamenco", "spanish heptatonic", "half-whole diminished", "chromatic"]
+ */
+function chordScales(name) {
+    const s = get(name);
+    const isChordIncluded = (0,_tonaljs_pcset__WEBPACK_IMPORTED_MODULE_3__.isSupersetOf)(s.chroma);
+    return (0,_tonaljs_scale_type__WEBPACK_IMPORTED_MODULE_4__.all)()
+        .filter((scale) => isChordIncluded(scale.chroma))
+        .map((scale) => scale.name);
+}
+/**
+ * Get all chords names that are a superset of the given one
+ * (has the same notes and at least one more)
+ *
+ * @function
+ * @example
+ * extended("CMaj7")
+ * // => [ 'Cmaj#4', 'Cmaj7#9#11', 'Cmaj9', 'CM7add13', 'Cmaj13', 'Cmaj9#11', 'CM13#11', 'CM7b9' ]
+ */
+function extended(chordName) {
+    const s = get(chordName);
+    const isSuperset = (0,_tonaljs_pcset__WEBPACK_IMPORTED_MODULE_3__.isSupersetOf)(s.chroma);
+    return (0,_tonaljs_chord_type__WEBPACK_IMPORTED_MODULE_1__.all)()
+        .filter((chord) => isSuperset(chord.chroma))
+        .map((chord) => s.tonic + chord.aliases[0]);
+}
+/**
+ * Find all chords names that are a subset of the given one
+ * (has less notes but all from the given chord)
+ *
+ * @example
+ */
+function reduced(chordName) {
+    const s = get(chordName);
+    const isSubset = (0,_tonaljs_pcset__WEBPACK_IMPORTED_MODULE_3__.isSubsetOf)(s.chroma);
+    return (0,_tonaljs_chord_type__WEBPACK_IMPORTED_MODULE_1__.all)()
+        .filter((chord) => isSubset(chord.chroma))
+        .map((chord) => s.tonic + chord.aliases[0]);
+}
+var index = {
+    getChord,
+    get,
+    detect: _tonaljs_chord_detect__WEBPACK_IMPORTED_MODULE_0__.detect,
+    chordScales,
+    extended,
+    reduced,
+    tokenize,
+    transpose,
+    // deprecate
+    chord,
+};
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/collection/dist/index.es.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/@tonaljs/collection/dist/index.es.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "compact": () => (/* binding */ compact),
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   "permutations": () => (/* binding */ permutations),
+/* harmony export */   "range": () => (/* binding */ range),
+/* harmony export */   "rotate": () => (/* binding */ rotate),
+/* harmony export */   "shuffle": () => (/* binding */ shuffle)
+/* harmony export */ });
+// ascending range
+function ascR(b, n) {
+    const a = [];
+    // tslint:disable-next-line:curly
+    for (; n--; a[n] = n + b)
+        ;
+    return a;
+}
+// descending range
+function descR(b, n) {
+    const a = [];
+    // tslint:disable-next-line:curly
+    for (; n--; a[n] = b - n)
+        ;
+    return a;
+}
+/**
+ * Creates a numeric range
+ *
+ * @param {number} from
+ * @param {number} to
+ * @return {Array<number>}
+ *
+ * @example
+ * range(-2, 2) // => [-2, -1, 0, 1, 2]
+ * range(2, -2) // => [2, 1, 0, -1, -2]
+ */
+function range(from, to) {
+    return from < to ? ascR(from, to - from + 1) : descR(from, from - to + 1);
+}
+/**
+ * Rotates a list a number of times. It"s completly agnostic about the
+ * contents of the list.
+ *
+ * @param {Integer} times - the number of rotations
+ * @param {Array} collection
+ * @return {Array} the rotated collection
+ *
+ * @example
+ * rotate(1, [1, 2, 3]) // => [2, 3, 1]
+ */
+function rotate(times, arr) {
+    const len = arr.length;
+    const n = ((times % len) + len) % len;
+    return arr.slice(n, len).concat(arr.slice(0, n));
+}
+/**
+ * Return a copy of the collection with the null values removed
+ * @function
+ * @param {Array} collection
+ * @return {Array}
+ *
+ * @example
+ * compact(["a", "b", null, "c"]) // => ["a", "b", "c"]
+ */
+function compact(arr) {
+    return arr.filter((n) => n === 0 || n);
+}
+/**
+ * Randomizes the order of the specified collection in-place, using the Fisher–Yates shuffle.
+ *
+ * @function
+ * @param {Array} collection
+ * @return {Array} the collection shuffled
+ *
+ * @example
+ * shuffle(["C", "D", "E", "F"]) // => [...]
+ */
+function shuffle(arr, rnd = Math.random) {
+    let i;
+    let t;
+    let m = arr.length;
+    while (m) {
+        i = Math.floor(rnd() * m--);
+        t = arr[m];
+        arr[m] = arr[i];
+        arr[i] = t;
+    }
+    return arr;
+}
+/**
+ * Get all permutations of an collection
+ *
+ * @param {Array} collection - the collection
+ * @return {Array<Array>} an collection with all the permutations
+ * @example
+ * permutations(["a", "b", "c"])) // =>
+ * [
+ *   ["a", "b", "c"],
+ *   ["b", "a", "c"],
+ *   ["b", "c", "a"],
+ *   ["a", "c", "b"],
+ *   ["c", "a", "b"],
+ *   ["c", "b", "a"]
+ * ]
+ */
+function permutations(arr) {
+    if (arr.length === 0) {
+        return [[]];
+    }
+    return permutations(arr.slice(1)).reduce((acc, perm) => {
+        return acc.concat(arr.map((e, pos) => {
+            const newPerm = perm.slice();
+            newPerm.splice(pos, 0, arr[0]);
+            return newPerm;
+        }));
+    }, []);
+}
+var index = {
+    compact,
+    permutations,
+    range,
+    rotate,
+    shuffle,
+};
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (index);
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/core/dist/index.es.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/@tonaljs/core/dist/index.es.js ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "accToAlt": () => (/* binding */ accToAlt),
+/* harmony export */   "altToAcc": () => (/* binding */ altToAcc),
+/* harmony export */   "coordToInterval": () => (/* binding */ coordToInterval),
+/* harmony export */   "coordToNote": () => (/* binding */ coordToNote),
+/* harmony export */   "decode": () => (/* binding */ decode),
+/* harmony export */   "deprecate": () => (/* binding */ deprecate),
+/* harmony export */   "distance": () => (/* binding */ distance),
+/* harmony export */   "encode": () => (/* binding */ encode),
+/* harmony export */   "fillStr": () => (/* binding */ fillStr),
+/* harmony export */   "interval": () => (/* binding */ interval),
+/* harmony export */   "isNamed": () => (/* binding */ isNamed),
+/* harmony export */   "isPitch": () => (/* binding */ isPitch),
+/* harmony export */   "note": () => (/* binding */ note),
+/* harmony export */   "stepToLetter": () => (/* binding */ stepToLetter),
+/* harmony export */   "tokenizeInterval": () => (/* binding */ tokenizeInterval),
+/* harmony export */   "tokenizeNote": () => (/* binding */ tokenizeNote),
+/* harmony export */   "transpose": () => (/* binding */ transpose)
+/* harmony export */ });
+/**
+ * Fill a string with a repeated character
+ *
+ * @param character
+ * @param repetition
+ */
+const fillStr = (s, n) => Array(Math.abs(n) + 1).join(s);
+function deprecate(original, alternative, fn) {
+    return function (...args) {
+        // tslint:disable-next-line
+        console.warn(`${original} is deprecated. Use ${alternative}.`);
+        return fn.apply(this, args);
+    };
+}
+
+function isNamed(src) {
+    return src !== null && typeof src === "object" && typeof src.name === "string"
+        ? true
+        : false;
+}
+
+function isPitch(pitch) {
+    return pitch !== null &&
+        typeof pitch === "object" &&
+        typeof pitch.step === "number" &&
+        typeof pitch.alt === "number"
+        ? true
+        : false;
+}
+// The number of fifths of [C, D, E, F, G, A, B]
+const FIFTHS = [0, 2, 4, -1, 1, 3, 5];
+// The number of octaves it span each step
+const STEPS_TO_OCTS = FIFTHS.map((fifths) => Math.floor((fifths * 7) / 12));
+function encode(pitch) {
+    const { step, alt, oct, dir = 1 } = pitch;
+    const f = FIFTHS[step] + 7 * alt;
+    if (oct === undefined) {
+        return [dir * f];
+    }
+    const o = oct - STEPS_TO_OCTS[step] - 4 * alt;
+    return [dir * f, dir * o];
+}
+// We need to get the steps from fifths
+// Fifths for CDEFGAB are [ 0, 2, 4, -1, 1, 3, 5 ]
+// We add 1 to fifths to avoid negative numbers, so:
+// for ["F", "C", "G", "D", "A", "E", "B"] we have:
+const FIFTHS_TO_STEPS = [3, 0, 4, 1, 5, 2, 6];
+function decode(coord) {
+    const [f, o, dir] = coord;
+    const step = FIFTHS_TO_STEPS[unaltered(f)];
+    const alt = Math.floor((f + 1) / 7);
+    if (o === undefined) {
+        return { step, alt, dir };
+    }
+    const oct = o + 4 * alt + STEPS_TO_OCTS[step];
+    return { step, alt, oct, dir };
+}
+// Return the number of fifths as if it were unaltered
+function unaltered(f) {
+    const i = (f + 1) % 7;
+    return i < 0 ? 7 + i : i;
+}
+
+const NoNote = { empty: true, name: "", pc: "", acc: "" };
+const cache$1 = new Map();
+const stepToLetter = (step) => "CDEFGAB".charAt(step);
+const altToAcc = (alt) => alt < 0 ? fillStr("b", -alt) : fillStr("#", alt);
+const accToAlt = (acc) => acc[0] === "b" ? -acc.length : acc.length;
+/**
+ * Given a note literal (a note name or a note object), returns the Note object
+ * @example
+ * note('Bb4') // => { name: "Bb4", midi: 70, chroma: 10, ... }
+ */
+function note(src) {
+    const cached = cache$1.get(src);
+    if (cached) {
+        return cached;
+    }
+    const value = typeof src === "string"
+        ? parse$1(src)
+        : isPitch(src)
+            ? note(pitchName$1(src))
+            : isNamed(src)
+                ? note(src.name)
+                : NoNote;
+    cache$1.set(src, value);
+    return value;
+}
+const REGEX$1 = /^([a-gA-G]?)(#{1,}|b{1,}|x{1,}|)(-?\d*)\s*(.*)$/;
+/**
+ * @private
+ */
+function tokenizeNote(str) {
+    const m = REGEX$1.exec(str);
+    return [m[1].toUpperCase(), m[2].replace(/x/g, "##"), m[3], m[4]];
+}
+/**
+ * @private
+ */
+function coordToNote(noteCoord) {
+    return note(decode(noteCoord));
+}
+const mod = (n, m) => ((n % m) + m) % m;
+const SEMI = [0, 2, 4, 5, 7, 9, 11];
+function parse$1(noteName) {
+    const tokens = tokenizeNote(noteName);
+    if (tokens[0] === "" || tokens[3] !== "") {
+        return NoNote;
+    }
+    const letter = tokens[0];
+    const acc = tokens[1];
+    const octStr = tokens[2];
+    const step = (letter.charCodeAt(0) + 3) % 7;
+    const alt = accToAlt(acc);
+    const oct = octStr.length ? +octStr : undefined;
+    const coord = encode({ step, alt, oct });
+    const name = letter + acc + octStr;
+    const pc = letter + acc;
+    const chroma = (SEMI[step] + alt + 120) % 12;
+    const height = oct === undefined
+        ? mod(SEMI[step] + alt, 12) - 12 * 99
+        : SEMI[step] + alt + 12 * (oct + 1);
+    const midi = height >= 0 && height <= 127 ? height : null;
+    const freq = oct === undefined ? null : Math.pow(2, (height - 69) / 12) * 440;
+    return {
+        empty: false,
+        acc,
+        alt,
+        chroma,
+        coord,
+        freq,
+        height,
+        letter,
+        midi,
+        name,
+        oct,
+        pc,
+        step,
+    };
+}
+function pitchName$1(props) {
+    const { step, alt, oct } = props;
+    const letter = stepToLetter(step);
+    if (!letter) {
+        return "";
+    }
+    const pc = letter + altToAcc(alt);
+    return oct || oct === 0 ? pc + oct : pc;
+}
+
+const NoInterval = { empty: true, name: "", acc: "" };
+// shorthand tonal notation (with quality after number)
+const INTERVAL_TONAL_REGEX = "([-+]?\\d+)(d{1,4}|m|M|P|A{1,4})";
+// standard shorthand notation (with quality before number)
+const INTERVAL_SHORTHAND_REGEX = "(AA|A|P|M|m|d|dd)([-+]?\\d+)";
+const REGEX = new RegExp("^" + INTERVAL_TONAL_REGEX + "|" + INTERVAL_SHORTHAND_REGEX + "$");
+/**
+ * @private
+ */
+function tokenizeInterval(str) {
+    const m = REGEX.exec(`${str}`);
+    if (m === null) {
+        return ["", ""];
+    }
+    return m[1] ? [m[1], m[2]] : [m[4], m[3]];
+}
+const cache = {};
+/**
+ * Get interval properties. It returns an object with:
+ *
+ * - name: the interval name
+ * - num: the interval number
+ * - type: 'perfectable' or 'majorable'
+ * - q: the interval quality (d, m, M, A)
+ * - dir: interval direction (1 ascending, -1 descending)
+ * - simple: the simplified number
+ * - semitones: the size in semitones
+ * - chroma: the interval chroma
+ *
+ * @param {string} interval - the interval name
+ * @return {Object} the interval properties
+ *
+ * @example
+ * import { interval } from '@tonaljs/core'
+ * interval('P5').semitones // => 7
+ * interval('m3').type // => 'majorable'
+ */
+function interval(src) {
+    return typeof src === "string"
+        ? cache[src] || (cache[src] = parse(src))
+        : isPitch(src)
+            ? interval(pitchName(src))
+            : isNamed(src)
+                ? interval(src.name)
+                : NoInterval;
+}
+const SIZES = [0, 2, 4, 5, 7, 9, 11];
+const TYPES = "PMMPPMM";
+function parse(str) {
+    const tokens = tokenizeInterval(str);
+    if (tokens[0] === "") {
+        return NoInterval;
+    }
+    const num = +tokens[0];
+    const q = tokens[1];
+    const step = (Math.abs(num) - 1) % 7;
+    const t = TYPES[step];
+    if (t === "M" && q === "P") {
+        return NoInterval;
+    }
+    const type = t === "M" ? "majorable" : "perfectable";
+    const name = "" + num + q;
+    const dir = num < 0 ? -1 : 1;
+    const simple = num === 8 || num === -8 ? num : dir * (step + 1);
+    const alt = qToAlt(type, q);
+    const oct = Math.floor((Math.abs(num) - 1) / 7);
+    const semitones = dir * (SIZES[step] + alt + 12 * oct);
+    const chroma = (((dir * (SIZES[step] + alt)) % 12) + 12) % 12;
+    const coord = encode({ step, alt, oct, dir });
+    return {
+        empty: false,
+        name,
+        num,
+        q,
+        step,
+        alt,
+        dir,
+        type,
+        simple,
+        semitones,
+        chroma,
+        coord,
+        oct,
+    };
+}
+/**
+ * @private
+ *
+ * forceDescending is used in the case of unison (#243)
+ */
+function coordToInterval(coord, forceDescending) {
+    const [f, o = 0] = coord;
+    const isDescending = f * 7 + o * 12 < 0;
+    const ivl = forceDescending || isDescending ? [-f, -o, -1] : [f, o, 1];
+    return interval(decode(ivl));
+}
+function qToAlt(type, q) {
+    return (q === "M" && type === "majorable") ||
+        (q === "P" && type === "perfectable")
+        ? 0
+        : q === "m" && type === "majorable"
+            ? -1
+            : /^A+$/.test(q)
+                ? q.length
+                : /^d+$/.test(q)
+                    ? -1 * (type === "perfectable" ? q.length : q.length + 1)
+                    : 0;
+}
+// return the interval name of a pitch
+function pitchName(props) {
+    const { step, alt, oct = 0, dir } = props;
+    if (!dir) {
+        return "";
+    }
+    const calcNum = step + 1 + 7 * oct;
+    // this is an edge case: descending pitch class unison (see #243)
+    const num = calcNum === 0 ? step + 1 : calcNum;
+    const d = dir < 0 ? "-" : "";
+    const type = TYPES[step] === "M" ? "majorable" : "perfectable";
+    const name = d + num + altToQ(type, alt);
+    return name;
+}
+function altToQ(type, alt) {
+    if (alt === 0) {
+        return type === "majorable" ? "M" : "P";
+    }
+    else if (alt === -1 && type === "majorable") {
+        return "m";
+    }
+    else if (alt > 0) {
+        return fillStr("A", alt);
+    }
+    else {
+        return fillStr("d", type === "perfectable" ? alt : alt + 1);
+    }
+}
+
+/**
+ * Transpose a note by an interval.
+ *
+ * @param {string} note - the note or note name
+ * @param {string} interval - the interval or interval name
+ * @return {string} the transposed note name or empty string if not valid notes
+ * @example
+ * import { tranpose } from "@tonaljs/core"
+ * transpose("d3", "3M") // => "F#3"
+ * transpose("D", "3M") // => "F#"
+ * ["C", "D", "E", "F", "G"].map(pc => transpose(pc, "M3)) // => ["E", "F#", "G#", "A", "B"]
+ */
+function transpose(noteName, intervalName) {
+    const note$1 = note(noteName);
+    const interval$1 = interval(intervalName);
+    if (note$1.empty || interval$1.empty) {
+        return "";
+    }
+    const noteCoord = note$1.coord;
+    const intervalCoord = interval$1.coord;
+    const tr = noteCoord.length === 1
+        ? [noteCoord[0] + intervalCoord[0]]
+        : [noteCoord[0] + intervalCoord[0], noteCoord[1] + intervalCoord[1]];
+    return coordToNote(tr).name;
+}
+/**
+ * Find the interval distance between two notes or coord classes.
+ *
+ * To find distance between coord classes, both notes must be coord classes and
+ * the interval is always ascending
+ *
+ * @param {Note|string} from - the note or note name to calculate distance from
+ * @param {Note|string} to - the note or note name to calculate distance to
+ * @return {string} the interval name or empty string if not valid notes
+ *
+ */
+function distance(fromNote, toNote) {
+    const from = note(fromNote);
+    const to = note(toNote);
+    if (from.empty || to.empty) {
+        return "";
+    }
+    const fcoord = from.coord;
+    const tcoord = to.coord;
+    const fifths = tcoord[0] - fcoord[0];
+    const octs = fcoord.length === 2 && tcoord.length === 2
+        ? tcoord[1] - fcoord[1]
+        : -Math.floor((fifths * 7) / 12);
+    // If it's unison and not pitch class, it can be descending interval (#243)
+    const forceDescending = to.height === from.height &&
+        to.midi !== null &&
+        from.midi !== null &&
+        from.step > to.step;
+    return coordToInterval([fifths, octs], forceDescending).name;
+}
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/duration-value/dist/index.es.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/@tonaljs/duration-value/dist/index.es.js ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   "fraction": () => (/* binding */ fraction),
+/* harmony export */   "get": () => (/* binding */ get),
+/* harmony export */   "names": () => (/* binding */ names),
+/* harmony export */   "shorthands": () => (/* binding */ shorthands),
+/* harmony export */   "value": () => (/* binding */ value)
+/* harmony export */ });
+// source: https://en.wikipedia.org/wiki/Note_value
+const DATA = [
+    [
+        0.125,
+        "dl",
+        ["large", "duplex longa", "maxima", "octuple", "octuple whole"],
+    ],
+    [0.25, "l", ["long", "longa"]],
+    [0.5, "d", ["double whole", "double", "breve"]],
+    [1, "w", ["whole", "semibreve"]],
+    [2, "h", ["half", "minim"]],
+    [4, "q", ["quarter", "crotchet"]],
+    [8, "e", ["eighth", "quaver"]],
+    [16, "s", ["sixteenth", "semiquaver"]],
+    [32, "t", ["thirty-second", "demisemiquaver"]],
+    [64, "sf", ["sixty-fourth", "hemidemisemiquaver"]],
+    [128, "h", ["hundred twenty-eighth"]],
+    [256, "th", ["two hundred fifty-sixth"]],
+];
+
+const VALUES = [];
+DATA.forEach(([denominator, shorthand, names]) => add(denominator, shorthand, names));
+const NoDuration = {
+    empty: true,
+    name: "",
+    value: 0,
+    fraction: [0, 0],
+    shorthand: "",
+    dots: "",
+    names: [],
+};
+function names() {
+    return VALUES.reduce((names, duration) => {
+        duration.names.forEach((name) => names.push(name));
+        return names;
+    }, []);
+}
+function shorthands() {
+    return VALUES.map((dur) => dur.shorthand);
+}
+const REGEX = /^([^.]+)(\.*)$/;
+function get(name) {
+    const [_, simple, dots] = REGEX.exec(name) || [];
+    const base = VALUES.find((dur) => dur.shorthand === simple || dur.names.includes(simple));
+    if (!base) {
+        return NoDuration;
+    }
+    const fraction = calcDots(base.fraction, dots.length);
+    const value = fraction[0] / fraction[1];
+    return { ...base, name, dots, value, fraction };
+}
+const value = (name) => get(name).value;
+const fraction = (name) => get(name).fraction;
+var index = { names, shorthands, get, value, fraction };
+//// PRIVATE ////
+function add(denominator, shorthand, names) {
+    VALUES.push({
+        empty: false,
+        dots: "",
+        name: "",
+        value: 1 / denominator,
+        fraction: denominator < 1 ? [1 / denominator, 1] : [1, denominator],
+        shorthand,
+        names,
+    });
+}
+function calcDots(fraction, dots) {
+    const pow = Math.pow(2, dots);
+    let numerator = fraction[0] * pow;
+    let denominator = fraction[1] * pow;
+    const base = numerator;
+    // add fractions
+    for (let i = 0; i < dots; i++) {
+        numerator += base / Math.pow(2, i + 1);
+    }
+    // simplify
+    while (numerator % 2 === 0 && denominator % 2 === 0) {
+        numerator /= 2;
+        denominator /= 2;
+    }
+    return [numerator, denominator];
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (index);
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/interval/dist/index.es.js":
+/*!*********************************************************!*\
+  !*** ./node_modules/@tonaljs/interval/dist/index.es.js ***!
+  \*********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "add": () => (/* binding */ add),
+/* harmony export */   "addTo": () => (/* binding */ addTo),
+/* harmony export */   "default": () => (/* binding */ index),
+/* harmony export */   "distance": () => (/* binding */ distance),
+/* harmony export */   "fromSemitones": () => (/* binding */ fromSemitones),
+/* harmony export */   "get": () => (/* binding */ get),
+/* harmony export */   "invert": () => (/* binding */ invert),
+/* harmony export */   "name": () => (/* binding */ name),
+/* harmony export */   "names": () => (/* binding */ names),
+/* harmony export */   "num": () => (/* binding */ num),
+/* harmony export */   "quality": () => (/* binding */ quality),
+/* harmony export */   "semitones": () => (/* binding */ semitones),
+/* harmony export */   "simplify": () => (/* binding */ simplify),
+/* harmony export */   "substract": () => (/* binding */ substract),
+/* harmony export */   "transposeFifths": () => (/* binding */ transposeFifths)
+/* harmony export */ });
+/* harmony import */ var _tonaljs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tonaljs/core */ "./node_modules/@tonaljs/core/dist/index.es.js");
+
+
+/**
+ * Get the natural list of names
+ */
+function names() {
+    return "1P 2M 3M 4P 5P 6m 7m".split(" ");
+}
+/**
+ * Get properties of an interval
+ *
+ * @function
+ * @example
+ * Interval.get('P4') // => {"alt": 0,  "dir": 1,  "name": "4P", "num": 4, "oct": 0, "q": "P", "semitones": 5, "simple": 4, "step": 3, "type": "perfectable"}
+ */
+const get = _tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.interval;
+/**
+ * Get name of an interval
+ *
+ * @function
+ * @example
+ * Interval.name('4P') // => "4P"
+ * Interval.name('P4') // => "4P"
+ * Interval.name('C4') // => ""
+ */
+const name = (name) => (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.interval)(name).name;
+/**
+ * Get semitones of an interval
+ * @function
+ * @example
+ * Interval.semitones('P4') // => 5
+ */
+const semitones = (name) => (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.interval)(name).semitones;
+/**
+ * Get quality of an interval
+ * @function
+ * @example
+ * Interval.quality('P4') // => "P"
+ */
+const quality = (name) => (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.interval)(name).q;
+/**
+ * Get number of an interval
+ * @function
+ * @example
+ * Interval.num('P4') // => 4
+ */
+const num = (name) => (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.interval)(name).num;
+/**
+ * Get the simplified version of an interval.
+ *
+ * @function
+ * @param {string} interval - the interval to simplify
+ * @return {string} the simplified interval
+ *
+ * @example
+ * Interval.simplify("9M") // => "2M"
+ * Interval.simplify("2M") // => "2M"
+ * Interval.simplify("-2M") // => "7m"
+ * ["8P", "9M", "10M", "11P", "12P", "13M", "14M", "15P"].map(Interval.simplify)
+ * // => [ "8P", "2M", "3M", "4P", "5P", "6M", "7M", "8P" ]
+ */
+function simplify(name) {
+    const i = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.interval)(name);
+    return i.empty ? "" : i.simple + i.q;
+}
+/**
+ * Get the inversion (https://en.wikipedia.org/wiki/Inversion_(music)#Intervals)
+ * of an interval.
+ *
+ * @function
+ * @param {string} interval - the interval to invert in interval shorthand
+ * notation or interval array notation
+ * @return {string} the inverted interval
+ *
+ * @example
+ * Interval.invert("3m") // => "6M"
+ * Interval.invert("2M") // => "7m"
+ */
+function invert(name) {
+    const i = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.interval)(name);
+    if (i.empty) {
+        return "";
+    }
+    const step = (7 - i.step) % 7;
+    const alt = i.type === "perfectable" ? -i.alt : -(i.alt + 1);
+    return (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.interval)({ step, alt, oct: i.oct, dir: i.dir }).name;
+}
+// interval numbers
+const IN = [1, 2, 2, 3, 3, 4, 5, 5, 6, 6, 7, 7];
+// interval qualities
+const IQ = "P m M m M P d P m M m M".split(" ");
+/**
+ * Get interval name from semitones number. Since there are several interval
+ * names for the same number, the name it's arbitrary, but deterministic.
+ *
+ * @param {Integer} num - the number of semitones (can be negative)
+ * @return {string} the interval name
+ * @example
+ * Interval.fromSemitones(7) // => "5P"
+ * Interval.fromSemitones(-7) // => "-5P"
+ */
+function fromSemitones(semitones) {
+    const d = semitones < 0 ? -1 : 1;
+    const n = Math.abs(semitones);
+    const c = n % 12;
+    const o = Math.floor(n / 12);
+    return d * (IN[c] + 7 * o) + IQ[c];
+}
+/**
+ * Find interval between two notes
+ *
+ * @example
+ * Interval.distance("C4", "G4"); // => "5P"
+ */
+const distance = _tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.distance;
+/**
+ * Adds two intervals
+ *
+ * @function
+ * @param {string} interval1
+ * @param {string} interval2
+ * @return {string} the added interval name
+ * @example
+ * Interval.add("3m", "5P") // => "7m"
+ */
+const add = combinator((a, b) => [a[0] + b[0], a[1] + b[1]]);
+/**
+ * Returns a function that adds an interval
+ *
+ * @function
+ * @example
+ * ['1P', '2M', '3M'].map(Interval.addTo('5P')) // => ["5P", "6M", "7M"]
+ */
+const addTo = (interval) => (other) => add(interval, other);
+/**
+ * Subtracts two intervals
+ *
+ * @function
+ * @param {string} minuendInterval
+ * @param {string} subtrahendInterval
+ * @return {string} the substracted interval name
+ * @example
+ * Interval.substract('5P', '3M') // => '3m'
+ * Interval.substract('3M', '5P') // => '-3m'
+ */
+const substract = combinator((a, b) => [a[0] - b[0], a[1] - b[1]]);
+function transposeFifths(interval, fifths) {
+    const ivl = get(interval);
+    if (ivl.empty)
+        return "";
+    const [nFifths, nOcts, dir] = ivl.coord;
+    return (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.coordToInterval)([nFifths + fifths, nOcts, dir]).name;
+}
+var index = {
+    names,
+    get,
+    name,
+    num,
+    semitones,
+    quality,
+    fromSemitones,
+    distance,
+    invert,
+    simplify,
+    add,
+    addTo,
+    substract,
+    transposeFifths,
+};
+function combinator(fn) {
+    return (a, b) => {
+        const coordA = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.interval)(a).coord;
+        const coordB = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.interval)(b).coord;
+        if (coordA && coordB) {
+            const coord = fn(coordA, coordB);
+            return (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.coordToInterval)(coord).name;
+        }
+    };
+}
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/key/dist/index.es.js":
+/*!****************************************************!*\
+  !*** ./node_modules/@tonaljs/key/dist/index.es.js ***!
+  \****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ index),
+/* harmony export */   "majorKey": () => (/* binding */ majorKey),
+/* harmony export */   "majorTonicFromKeySignature": () => (/* binding */ majorTonicFromKeySignature),
+/* harmony export */   "minorKey": () => (/* binding */ minorKey)
+/* harmony export */ });
+/* harmony import */ var _tonaljs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tonaljs/core */ "./node_modules/@tonaljs/core/dist/index.es.js");
+/* harmony import */ var _tonaljs_note__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tonaljs/note */ "./node_modules/@tonaljs/note/dist/index.es.js");
+/* harmony import */ var _tonaljs_roman_numeral__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @tonaljs/roman-numeral */ "./node_modules/@tonaljs/roman-numeral/dist/index.es.js");
+
+
+
+
+const Empty = Object.freeze([]);
+const NoKey = {
+    type: "major",
+    tonic: "",
+    alteration: 0,
+    keySignature: "",
+};
+const NoKeyScale = {
+    tonic: "",
+    grades: Empty,
+    intervals: Empty,
+    scale: Empty,
+    chords: Empty,
+    chordsHarmonicFunction: Empty,
+    chordScales: Empty,
+};
+const NoMajorKey = {
+    ...NoKey,
+    ...NoKeyScale,
+    type: "major",
+    minorRelative: "",
+    scale: Empty,
+    secondaryDominants: Empty,
+    secondaryDominantsMinorRelative: Empty,
+    substituteDominants: Empty,
+    substituteDominantsMinorRelative: Empty,
+};
+const NoMinorKey = {
+    ...NoKey,
+    type: "minor",
+    relativeMajor: "",
+    natural: NoKeyScale,
+    harmonic: NoKeyScale,
+    melodic: NoKeyScale,
+};
+const mapScaleToType = (scale, list, sep = "") => list.map((type, i) => `${scale[i]}${sep}${type}`);
+function keyScale(grades, chords, harmonicFunctions, chordScales) {
+    return (tonic) => {
+        const intervals = grades.map((gr) => (0,_tonaljs_roman_numeral__WEBPACK_IMPORTED_MODULE_2__.get)(gr).interval || "");
+        const scale = intervals.map((interval) => (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.transpose)(tonic, interval));
+        return {
+            tonic,
+            grades,
+            intervals,
+            scale,
+            chords: mapScaleToType(scale, chords),
+            chordsHarmonicFunction: harmonicFunctions.slice(),
+            chordScales: mapScaleToType(scale, chordScales, " "),
+        };
+    };
+}
+const distInFifths = (from, to) => {
+    const f = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.note)(from);
+    const t = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.note)(to);
+    return f.empty || t.empty ? 0 : t.coord[0] - f.coord[0];
+};
+const MajorScale = keyScale("I II III IV V VI VII".split(" "), "maj7 m7 m7 maj7 7 m7 m7b5".split(" "), "T SD T SD D T D".split(" "), "major,dorian,phrygian,lydian,mixolydian,minor,locrian".split(","));
+const NaturalScale = keyScale("I II bIII IV V bVI bVII".split(" "), "m7 m7b5 maj7 m7 m7 maj7 7".split(" "), "T SD T SD D SD SD".split(" "), "minor,locrian,major,dorian,phrygian,lydian,mixolydian".split(","));
+const HarmonicScale = keyScale("I II bIII IV V bVI VII".split(" "), "mMaj7 m7b5 +maj7 m7 7 maj7 o7".split(" "), "T SD T SD D SD D".split(" "), "harmonic minor,locrian 6,major augmented,lydian diminished,phrygian dominant,lydian #9,ultralocrian".split(","));
+const MelodicScale = keyScale("I II bIII IV V VI VII".split(" "), "m6 m7 +maj7 7 7 m7b5 m7b5".split(" "), "T SD T SD D  ".split(" "), "melodic minor,dorian b2,lydian augmented,lydian dominant,mixolydian b6,locrian #2,altered".split(","));
+/**
+ * Get a major key properties in a given tonic
+ * @param tonic
+ */
+function majorKey(tonic) {
+    const pc = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.note)(tonic).pc;
+    if (!pc)
+        return NoMajorKey;
+    const keyScale = MajorScale(pc);
+    const alteration = distInFifths("C", pc);
+    const romanInTonic = (src) => {
+        const r = (0,_tonaljs_roman_numeral__WEBPACK_IMPORTED_MODULE_2__.get)(src);
+        if (r.empty)
+            return "";
+        return (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.transpose)(tonic, r.interval) + r.chordType;
+    };
+    return {
+        ...keyScale,
+        type: "major",
+        minorRelative: (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.transpose)(pc, "-3m"),
+        alteration,
+        keySignature: (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.altToAcc)(alteration),
+        secondaryDominants: "- VI7 VII7 I7 II7 III7 -".split(" ").map(romanInTonic),
+        secondaryDominantsMinorRelative: "- IIIm7b5 IV#m7 Vm7 VIm7 VIIm7b5 -"
+            .split(" ")
+            .map(romanInTonic),
+        substituteDominants: "- bIII7 IV7 bV7 bVI7 bVII7 -"
+            .split(" ")
+            .map(romanInTonic),
+        substituteDominantsMinorRelative: "- IIIm7 Im7 IIbm7 VIm7 IVm7 -"
+            .split(" ")
+            .map(romanInTonic),
+    };
+}
+/**
+ * Get minor key properties in a given tonic
+ * @param tonic
+ */
+function minorKey(tnc) {
+    const pc = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.note)(tnc).pc;
+    if (!pc)
+        return NoMinorKey;
+    const alteration = distInFifths("C", pc) - 3;
+    return {
+        type: "minor",
+        tonic: pc,
+        relativeMajor: (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.transpose)(pc, "3m"),
+        alteration,
+        keySignature: (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.altToAcc)(alteration),
+        natural: NaturalScale(pc),
+        harmonic: HarmonicScale(pc),
+        melodic: MelodicScale(pc),
+    };
+}
+/**
+ * Given a key signature, returns the tonic of the major key
+ * @param sigature
+ * @example
+ * majorTonicFromKeySignature('###') // => 'A'
+ */
+function majorTonicFromKeySignature(sig) {
+    if (typeof sig === "number") {
+        return (0,_tonaljs_note__WEBPACK_IMPORTED_MODULE_1__.transposeFifths)("C", sig);
+    }
+    else if (typeof sig === "string" && /^b+|#+$/.test(sig)) {
+        return (0,_tonaljs_note__WEBPACK_IMPORTED_MODULE_1__.transposeFifths)("C", (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.accToAlt)(sig));
+    }
+    return null;
+}
+var index = { majorKey, majorTonicFromKeySignature, minorKey };
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/midi/dist/index.es.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/@tonaljs/midi/dist/index.es.js ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ index),
+/* harmony export */   "freqToMidi": () => (/* binding */ freqToMidi),
+/* harmony export */   "isMidi": () => (/* binding */ isMidi),
+/* harmony export */   "midiToFreq": () => (/* binding */ midiToFreq),
+/* harmony export */   "midiToNoteName": () => (/* binding */ midiToNoteName),
+/* harmony export */   "toMidi": () => (/* binding */ toMidi)
+/* harmony export */ });
+/* harmony import */ var _tonaljs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tonaljs/core */ "./node_modules/@tonaljs/core/dist/index.es.js");
+
+
+function isMidi(arg) {
+    return +arg >= 0 && +arg <= 127;
+}
+/**
+ * Get the note midi number (a number between 0 and 127)
+ *
+ * It returns undefined if not valid note name
+ *
+ * @function
+ * @param {string|number} note - the note name or midi number
+ * @return {Integer} the midi number or undefined if not valid note
+ * @example
+ * import { toMidi } from '@tonaljs/midi'
+ * toMidi("C4") // => 60
+ * toMidi(60) // => 60
+ * toMidi('60') // => 60
+ */
+function toMidi(note$1) {
+    if (isMidi(note$1)) {
+        return +note$1;
+    }
+    const n = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.note)(note$1);
+    return n.empty ? null : n.midi;
+}
+/**
+ * Get the frequency in hertzs from midi number
+ *
+ * @param {number} midi - the note midi number
+ * @param {number} [tuning = 440] - A4 tuning frequency in Hz (440 by default)
+ * @return {number} the frequency or null if not valid note midi
+ * @example
+ * import { midiToFreq} from '@tonaljs/midi'
+ * midiToFreq(69) // => 440
+ */
+function midiToFreq(midi, tuning = 440) {
+    return Math.pow(2, (midi - 69) / 12) * tuning;
+}
+const L2 = Math.log(2);
+const L440 = Math.log(440);
+/**
+ * Get the midi number from a frequency in hertz. The midi number can
+ * contain decimals (with two digits precission)
+ *
+ * @param {number} frequency
+ * @return {number}
+ * @example
+ * import { freqToMidi} from '@tonaljs/midi'
+ * freqToMidi(220)); //=> 57
+ * freqToMidi(261.62)); //=> 60
+ * freqToMidi(261)); //=> 59.96
+ */
+function freqToMidi(freq) {
+    const v = (12 * (Math.log(freq) - L440)) / L2 + 69;
+    return Math.round(v * 100) / 100;
+}
+const SHARPS = "C C# D D# E F F# G G# A A# B".split(" ");
+const FLATS = "C Db D Eb E F Gb G Ab A Bb B".split(" ");
+/**
+ * Given a midi number, returns a note name. The altered notes will have
+ * flats unless explicitly set with the optional `useSharps` parameter.
+ *
+ * @function
+ * @param {number} midi - the midi note number
+ * @param {Object} options = default: `{ sharps: false, pitchClass: false }`
+ * @param {boolean} useSharps - (Optional) set to true to use sharps instead of flats
+ * @return {string} the note name
+ * @example
+ * import { midiToNoteName } from '@tonaljs/midi'
+ * midiToNoteName(61) // => "Db4"
+ * midiToNoteName(61, { pitchClass: true }) // => "Db"
+ * midiToNoteName(61, { sharps: true }) // => "C#4"
+ * midiToNoteName(61, { pitchClass: true, sharps: true }) // => "C#"
+ * // it rounds to nearest note
+ * midiToNoteName(61.7) // => "D4"
+ */
+function midiToNoteName(midi, options = {}) {
+    if (isNaN(midi) || midi === -Infinity || midi === Infinity)
+        return "";
+    midi = Math.round(midi);
+    const pcs = options.sharps === true ? SHARPS : FLATS;
+    const pc = pcs[midi % 12];
+    if (options.pitchClass) {
+        return pc;
+    }
+    const o = Math.floor(midi / 12) - 1;
+    return pc + o;
+}
+var index = { isMidi, toMidi, midiToFreq, midiToNoteName, freqToMidi };
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/mode/dist/index.es.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/@tonaljs/mode/dist/index.es.js ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "all": () => (/* binding */ all),
+/* harmony export */   "default": () => (/* binding */ index$1),
+/* harmony export */   "distance": () => (/* binding */ distance),
+/* harmony export */   "entries": () => (/* binding */ entries),
+/* harmony export */   "get": () => (/* binding */ get),
+/* harmony export */   "mode": () => (/* binding */ mode),
+/* harmony export */   "names": () => (/* binding */ names),
+/* harmony export */   "notes": () => (/* binding */ notes),
+/* harmony export */   "relativeTonic": () => (/* binding */ relativeTonic),
+/* harmony export */   "seventhChords": () => (/* binding */ seventhChords),
+/* harmony export */   "triads": () => (/* binding */ triads)
+/* harmony export */ });
+/* harmony import */ var _tonaljs_collection__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tonaljs/collection */ "./node_modules/@tonaljs/collection/dist/index.es.js");
+/* harmony import */ var _tonaljs_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tonaljs/core */ "./node_modules/@tonaljs/core/dist/index.es.js");
+/* harmony import */ var _tonaljs_interval__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @tonaljs/interval */ "./node_modules/@tonaljs/interval/dist/index.es.js");
+/* harmony import */ var _tonaljs_pcset__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @tonaljs/pcset */ "./node_modules/@tonaljs/pcset/dist/index.es.js");
+/* harmony import */ var _tonaljs_scale_type__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @tonaljs/scale-type */ "./node_modules/@tonaljs/scale-type/dist/index.es.js");
+
+
+
+
+
+
+const MODES = [
+    [0, 2773, 0, "ionian", "", "Maj7", "major"],
+    [1, 2902, 2, "dorian", "m", "m7"],
+    [2, 3418, 4, "phrygian", "m", "m7"],
+    [3, 2741, -1, "lydian", "", "Maj7"],
+    [4, 2774, 1, "mixolydian", "", "7"],
+    [5, 2906, 3, "aeolian", "m", "m7", "minor"],
+    [6, 3434, 5, "locrian", "dim", "m7b5"],
+];
+const NoMode = {
+    ..._tonaljs_pcset__WEBPACK_IMPORTED_MODULE_3__.EmptyPcset,
+    name: "",
+    alt: 0,
+    modeNum: NaN,
+    triad: "",
+    seventh: "",
+    aliases: [],
+};
+const modes = MODES.map(toMode);
+const index = {};
+modes.forEach((mode) => {
+    index[mode.name] = mode;
+    mode.aliases.forEach((alias) => {
+        index[alias] = mode;
+    });
+});
+/**
+ * Get a Mode by it's name
+ *
+ * @example
+ * get('dorian')
+ * // =>
+ * // {
+ * //   intervals: [ '1P', '2M', '3m', '4P', '5P', '6M', '7m' ],
+ * //   modeNum: 1,
+ * //   chroma: '101101010110',
+ * //   normalized: '101101010110',
+ * //   name: 'dorian',
+ * //   setNum: 2902,
+ * //   alt: 2,
+ * //   triad: 'm',
+ * //   seventh: 'm7',
+ * //   aliases: []
+ * // }
+ */
+function get(name) {
+    return typeof name === "string"
+        ? index[name.toLowerCase()] || NoMode
+        : name && name.name
+            ? get(name.name)
+            : NoMode;
+}
+const mode = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.deprecate)("Mode.mode", "Mode.get", get);
+/**
+ * Get a list of all modes
+ */
+function all() {
+    return modes.slice();
+}
+const entries = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.deprecate)("Mode.mode", "Mode.all", all);
+/**
+ * Get a list of all mode names
+ */
+function names() {
+    return modes.map((mode) => mode.name);
+}
+function toMode(mode) {
+    const [modeNum, setNum, alt, name, triad, seventh, alias] = mode;
+    const aliases = alias ? [alias] : [];
+    const chroma = Number(setNum).toString(2);
+    const intervals = (0,_tonaljs_scale_type__WEBPACK_IMPORTED_MODULE_4__.get)(name).intervals;
+    return {
+        empty: false,
+        intervals,
+        modeNum,
+        chroma,
+        normalized: chroma,
+        name,
+        setNum,
+        alt,
+        triad,
+        seventh,
+        aliases,
+    };
+}
+function notes(modeName, tonic) {
+    return get(modeName).intervals.map((ivl) => (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.transpose)(tonic, ivl));
+}
+function chords(chords) {
+    return (modeName, tonic) => {
+        const mode = get(modeName);
+        if (mode.empty)
+            return [];
+        const triads = (0,_tonaljs_collection__WEBPACK_IMPORTED_MODULE_0__.rotate)(mode.modeNum, chords);
+        const tonics = mode.intervals.map((i) => (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.transpose)(tonic, i));
+        return triads.map((triad, i) => tonics[i] + triad);
+    };
+}
+const triads = chords(MODES.map((x) => x[4]));
+const seventhChords = chords(MODES.map((x) => x[5]));
+function distance(destination, source) {
+    const from = get(source);
+    const to = get(destination);
+    if (from.empty || to.empty)
+        return "";
+    return (0,_tonaljs_interval__WEBPACK_IMPORTED_MODULE_2__.simplify)((0,_tonaljs_interval__WEBPACK_IMPORTED_MODULE_2__.transposeFifths)("1P", to.alt - from.alt));
+}
+function relativeTonic(destination, source, tonic) {
+    return (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.transpose)(tonic, distance(destination, source));
+}
+var index$1 = {
+    get,
+    names,
+    all,
+    distance,
+    relativeTonic,
+    notes,
+    triads,
+    seventhChords,
+    // deprecated
+    entries,
+    mode,
+};
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/note/dist/index.es.js":
+/*!*****************************************************!*\
+  !*** ./node_modules/@tonaljs/note/dist/index.es.js ***!
+  \*****************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "accidentals": () => (/* binding */ accidentals),
+/* harmony export */   "ascending": () => (/* binding */ ascending),
+/* harmony export */   "chroma": () => (/* binding */ chroma),
+/* harmony export */   "default": () => (/* binding */ index),
+/* harmony export */   "descending": () => (/* binding */ descending),
+/* harmony export */   "enharmonic": () => (/* binding */ enharmonic),
+/* harmony export */   "freq": () => (/* binding */ freq),
+/* harmony export */   "fromFreq": () => (/* binding */ fromFreq),
+/* harmony export */   "fromFreqSharps": () => (/* binding */ fromFreqSharps),
+/* harmony export */   "fromMidi": () => (/* binding */ fromMidi),
+/* harmony export */   "fromMidiSharps": () => (/* binding */ fromMidiSharps),
+/* harmony export */   "get": () => (/* binding */ get),
+/* harmony export */   "midi": () => (/* binding */ midi),
+/* harmony export */   "name": () => (/* binding */ name),
+/* harmony export */   "names": () => (/* binding */ names),
+/* harmony export */   "octave": () => (/* binding */ octave),
+/* harmony export */   "pitchClass": () => (/* binding */ pitchClass),
+/* harmony export */   "simplify": () => (/* binding */ simplify),
+/* harmony export */   "sortedNames": () => (/* binding */ sortedNames),
+/* harmony export */   "sortedUniqNames": () => (/* binding */ sortedUniqNames),
+/* harmony export */   "tr": () => (/* binding */ tr),
+/* harmony export */   "trBy": () => (/* binding */ trBy),
+/* harmony export */   "trFifths": () => (/* binding */ trFifths),
+/* harmony export */   "trFrom": () => (/* binding */ trFrom),
+/* harmony export */   "transpose": () => (/* binding */ transpose),
+/* harmony export */   "transposeBy": () => (/* binding */ transposeBy),
+/* harmony export */   "transposeFifths": () => (/* binding */ transposeFifths),
+/* harmony export */   "transposeFrom": () => (/* binding */ transposeFrom)
+/* harmony export */ });
+/* harmony import */ var _tonaljs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tonaljs/core */ "./node_modules/@tonaljs/core/dist/index.es.js");
+/* harmony import */ var _tonaljs_midi__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tonaljs/midi */ "./node_modules/@tonaljs/midi/dist/index.es.js");
+
+
+
+const NAMES = ["C", "D", "E", "F", "G", "A", "B"];
+const toName = (n) => n.name;
+const onlyNotes = (array) => array.map(_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.note).filter((n) => !n.empty);
+/**
+ * Return the natural note names without octave
+ * @function
+ * @example
+ * Note.names(); // => ["C", "D", "E", "F", "G", "A", "B"]
+ */
+function names(array) {
+    if (array === undefined) {
+        return NAMES.slice();
+    }
+    else if (!Array.isArray(array)) {
+        return [];
+    }
+    else {
+        return onlyNotes(array).map(toName);
+    }
+}
+/**
+ * Get a note from a note name
+ *
+ * @function
+ * @example
+ * Note.get('Bb4') // => { name: "Bb4", midi: 70, chroma: 10, ... }
+ */
+const get = _tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.note;
+/**
+ * Get the note name
+ * @function
+ */
+const name = (note) => get(note).name;
+/**
+ * Get the note pitch class name
+ * @function
+ */
+const pitchClass = (note) => get(note).pc;
+/**
+ * Get the note accidentals
+ * @function
+ */
+const accidentals = (note) => get(note).acc;
+/**
+ * Get the note octave
+ * @function
+ */
+const octave = (note) => get(note).oct;
+/**
+ * Get the note midi
+ * @function
+ */
+const midi = (note) => get(note).midi;
+/**
+ * Get the note midi
+ * @function
+ */
+const freq = (note) => get(note).freq;
+/**
+ * Get the note chroma
+ * @function
+ */
+const chroma = (note) => get(note).chroma;
+/**
+ * Given a midi number, returns a note name. Uses flats for altered notes.
+ *
+ * @function
+ * @param {number} midi - the midi note number
+ * @return {string} the note name
+ * @example
+ * Note.fromMidi(61) // => "Db4"
+ * Note.fromMidi(61.7) // => "D4"
+ */
+function fromMidi(midi) {
+    return (0,_tonaljs_midi__WEBPACK_IMPORTED_MODULE_1__.midiToNoteName)(midi);
+}
+/**
+ * Given a midi number, returns a note name. Uses flats for altered notes.
+ */
+function fromFreq(freq) {
+    return (0,_tonaljs_midi__WEBPACK_IMPORTED_MODULE_1__.midiToNoteName)((0,_tonaljs_midi__WEBPACK_IMPORTED_MODULE_1__.freqToMidi)(freq));
+}
+/**
+ * Given a midi number, returns a note name. Uses flats for altered notes.
+ */
+function fromFreqSharps(freq) {
+    return (0,_tonaljs_midi__WEBPACK_IMPORTED_MODULE_1__.midiToNoteName)((0,_tonaljs_midi__WEBPACK_IMPORTED_MODULE_1__.freqToMidi)(freq), { sharps: true });
+}
+/**
+ * Given a midi number, returns a note name. Uses flats for altered notes.
+ *
+ * @function
+ * @param {number} midi - the midi note number
+ * @return {string} the note name
+ * @example
+ * Note.fromMidiSharps(61) // => "C#4"
+ */
+function fromMidiSharps(midi) {
+    return (0,_tonaljs_midi__WEBPACK_IMPORTED_MODULE_1__.midiToNoteName)(midi, { sharps: true });
+}
+/**
+ * Transpose a note by an interval
+ */
+const transpose = _tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.transpose;
+const tr = _tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.transpose;
+/**
+ * Transpose by an interval.
+ * @function
+ * @param {string} interval
+ * @return {function} a function that transposes by the given interval
+ * @example
+ * ["C", "D", "E"].map(Note.transposeBy("5P"));
+ * // => ["G", "A", "B"]
+ */
+const transposeBy = (interval) => (note) => transpose(note, interval);
+const trBy = transposeBy;
+/**
+ * Transpose from a note
+ * @function
+ * @param {string} note
+ * @return {function}  a function that transposes the the note by an interval
+ * ["1P", "3M", "5P"].map(Note.transposeFrom("C"));
+ * // => ["C", "E", "G"]
+ */
+const transposeFrom = (note) => (interval) => transpose(note, interval);
+const trFrom = transposeFrom;
+/**
+ * Transpose a note by a number of perfect fifths.
+ *
+ * @function
+ * @param {string} note - the note name
+ * @param {number} fifhts - the number of fifths
+ * @return {string} the transposed note name
+ *
+ * @example
+ * import { transposeFifths } from "@tonaljs/note"
+ * transposeFifths("G4", 1) // => "D"
+ * [0, 1, 2, 3, 4].map(fifths => transposeFifths("C", fifths)) // => ["C", "G", "D", "A", "E"]
+ */
+function transposeFifths(noteName, fifths) {
+    const note = get(noteName);
+    if (note.empty) {
+        return "";
+    }
+    const [nFifths, nOcts] = note.coord;
+    const transposed = nOcts === undefined
+        ? (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.coordToNote)([nFifths + fifths])
+        : (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.coordToNote)([nFifths + fifths, nOcts]);
+    return transposed.name;
+}
+const trFifths = transposeFifths;
+const ascending = (a, b) => a.height - b.height;
+const descending = (a, b) => b.height - a.height;
+function sortedNames(notes, comparator) {
+    comparator = comparator || ascending;
+    return onlyNotes(notes).sort(comparator).map(toName);
+}
+function sortedUniqNames(notes) {
+    return sortedNames(notes, ascending).filter((n, i, a) => i === 0 || n !== a[i - 1]);
+}
+/**
+ * Simplify a note
+ *
+ * @function
+ * @param {string} note - the note to be simplified
+ * - sameAccType: default true. Use same kind of accidentals that source
+ * @return {string} the simplified note or '' if not valid note
+ * @example
+ * simplify("C##") // => "D"
+ * simplify("C###") // => "D#"
+ * simplify("C###")
+ * simplify("B#4") // => "C5"
+ */
+const simplify = (noteName) => {
+    const note = get(noteName);
+    if (note.empty) {
+        return "";
+    }
+    return (0,_tonaljs_midi__WEBPACK_IMPORTED_MODULE_1__.midiToNoteName)(note.midi || note.chroma, {
+        sharps: note.alt > 0,
+        pitchClass: note.midi === null,
+    });
+};
+/**
+ * Get enharmonic of a note
+ *
+ * @function
+ * @param {string} note
+ * @param [string] - [optional] Destination pitch class
+ * @return {string} the enharmonic note name or '' if not valid note
+ * @example
+ * Note.enharmonic("Db") // => "C#"
+ * Note.enharmonic("C") // => "C"
+ * Note.enharmonic("F2","E#") // => "E#2"
+ */
+function enharmonic(noteName, destName) {
+    const src = get(noteName);
+    if (src.empty) {
+        return "";
+    }
+    // destination: use given or generate one
+    const dest = get(destName ||
+        (0,_tonaljs_midi__WEBPACK_IMPORTED_MODULE_1__.midiToNoteName)(src.midi || src.chroma, {
+            sharps: src.alt < 0,
+            pitchClass: true,
+        }));
+    // ensure destination is valid
+    if (dest.empty || dest.chroma !== src.chroma) {
+        return "";
+    }
+    // if src has no octave, no need to calculate anything else
+    if (src.oct === undefined) {
+        return dest.pc;
+    }
+    // detect any octave overflow
+    const srcChroma = src.chroma - src.alt;
+    const destChroma = dest.chroma - dest.alt;
+    const destOctOffset = srcChroma > 11 || destChroma < 0
+        ? -1
+        : srcChroma < 0 || destChroma > 11
+            ? +1
+            : 0;
+    // calculate the new octave
+    const destOct = src.oct + destOctOffset;
+    return dest.pc + destOct;
+}
+var index = {
+    names,
+    get,
+    name,
+    pitchClass,
+    accidentals,
+    octave,
+    midi,
+    ascending,
+    descending,
+    sortedNames,
+    sortedUniqNames,
+    fromMidi,
+    fromMidiSharps,
+    freq,
+    fromFreq,
+    fromFreqSharps,
+    chroma,
+    transpose,
+    tr,
+    transposeBy,
+    trBy,
+    transposeFrom,
+    trFrom,
+    transposeFifths,
+    trFifths,
+    simplify,
+    enharmonic,
+};
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/pcset/dist/index.es.js":
+/*!******************************************************!*\
+  !*** ./node_modules/@tonaljs/pcset/dist/index.es.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "EmptyPcset": () => (/* binding */ EmptyPcset),
+/* harmony export */   "chromaToIntervals": () => (/* binding */ chromaToIntervals),
+/* harmony export */   "chromas": () => (/* binding */ chromas),
+/* harmony export */   "default": () => (/* binding */ index),
+/* harmony export */   "filter": () => (/* binding */ filter),
+/* harmony export */   "get": () => (/* binding */ get),
+/* harmony export */   "includes": () => (/* binding */ includes),
+/* harmony export */   "isEqual": () => (/* binding */ isEqual),
+/* harmony export */   "isNoteIncludedIn": () => (/* binding */ isNoteIncludedIn),
+/* harmony export */   "isSubsetOf": () => (/* binding */ isSubsetOf),
+/* harmony export */   "isSupersetOf": () => (/* binding */ isSupersetOf),
+/* harmony export */   "modes": () => (/* binding */ modes),
+/* harmony export */   "pcset": () => (/* binding */ pcset)
+/* harmony export */ });
+/* harmony import */ var _tonaljs_collection__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tonaljs/collection */ "./node_modules/@tonaljs/collection/dist/index.es.js");
+/* harmony import */ var _tonaljs_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tonaljs/core */ "./node_modules/@tonaljs/core/dist/index.es.js");
+
+
+
+const EmptyPcset = {
+    empty: true,
+    name: "",
+    setNum: 0,
+    chroma: "000000000000",
+    normalized: "000000000000",
+    intervals: [],
+};
+// UTILITIES
+const setNumToChroma = (num) => Number(num).toString(2);
+const chromaToNumber = (chroma) => parseInt(chroma, 2);
+const REGEX = /^[01]{12}$/;
+function isChroma(set) {
+    return REGEX.test(set);
+}
+const isPcsetNum = (set) => typeof set === "number" && set >= 0 && set <= 4095;
+const isPcset = (set) => set && isChroma(set.chroma);
+const cache = { [EmptyPcset.chroma]: EmptyPcset };
+/**
+ * Get the pitch class set of a collection of notes or set number or chroma
+ */
+function get(src) {
+    const chroma = isChroma(src)
+        ? src
+        : isPcsetNum(src)
+            ? setNumToChroma(src)
+            : Array.isArray(src)
+                ? listToChroma(src)
+                : isPcset(src)
+                    ? src.chroma
+                    : EmptyPcset.chroma;
+    return (cache[chroma] = cache[chroma] || chromaToPcset(chroma));
+}
+/**
+ * Use Pcset.properties
+ * @function
+ * @deprecated
+ */
+const pcset = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.deprecate)("Pcset.pcset", "Pcset.get", get);
+/**
+ * Get pitch class set chroma
+ * @function
+ * @example
+ * Pcset.chroma(["c", "d", "e"]); //=> "101010000000"
+ */
+const chroma = (set) => get(set).chroma;
+/**
+ * Get intervals (from C) of a set
+ * @function
+ * @example
+ * Pcset.intervals(["c", "d", "e"]); //=>
+ */
+const intervals = (set) => get(set).intervals;
+/**
+ * Get pitch class set number
+ * @function
+ * @example
+ * Pcset.num(["c", "d", "e"]); //=> 2192
+ */
+const num = (set) => get(set).setNum;
+const IVLS = [
+    "1P",
+    "2m",
+    "2M",
+    "3m",
+    "3M",
+    "4P",
+    "5d",
+    "5P",
+    "6m",
+    "6M",
+    "7m",
+    "7M",
+];
+/**
+ * @private
+ * Get the intervals of a pcset *starting from C*
+ * @param {Set} set - the pitch class set
+ * @return {IntervalName[]} an array of interval names or an empty array
+ * if not a valid pitch class set
+ */
+function chromaToIntervals(chroma) {
+    const intervals = [];
+    for (let i = 0; i < 12; i++) {
+        // tslint:disable-next-line:curly
+        if (chroma.charAt(i) === "1")
+            intervals.push(IVLS[i]);
+    }
+    return intervals;
+}
+/**
+ * Get a list of all possible pitch class sets (all possible chromas) *having
+ * C as root*. There are 2048 different chromas. If you want them with another
+ * note you have to transpose it
+ *
+ * @see http://allthescales.org/
+ * @return {Array<PcsetChroma>} an array of possible chromas from '10000000000' to '11111111111'
+ */
+function chromas() {
+    return (0,_tonaljs_collection__WEBPACK_IMPORTED_MODULE_0__.range)(2048, 4095).map(setNumToChroma);
+}
+/**
+ * Given a a list of notes or a pcset chroma, produce the rotations
+ * of the chroma discarding the ones that starts with "0"
+ *
+ * This is used, for example, to get all the modes of a scale.
+ *
+ * @param {Array|string} set - the list of notes or pitchChr of the set
+ * @param {boolean} normalize - (Optional, true by default) remove all
+ * the rotations that starts with "0"
+ * @return {Array<string>} an array with all the modes of the chroma
+ *
+ * @example
+ * Pcset.modes(["C", "D", "E"]).map(Pcset.intervals)
+ */
+function modes(set, normalize = true) {
+    const pcs = get(set);
+    const binary = pcs.chroma.split("");
+    return (0,_tonaljs_collection__WEBPACK_IMPORTED_MODULE_0__.compact)(binary.map((_, i) => {
+        const r = (0,_tonaljs_collection__WEBPACK_IMPORTED_MODULE_0__.rotate)(i, binary);
+        return normalize && r[0] === "0" ? null : r.join("");
+    }));
+}
+/**
+ * Test if two pitch class sets are numentical
+ *
+ * @param {Array|string} set1 - one of the pitch class sets
+ * @param {Array|string} set2 - the other pitch class set
+ * @return {boolean} true if they are equal
+ * @example
+ * Pcset.isEqual(["c2", "d3"], ["c5", "d2"]) // => true
+ */
+function isEqual(s1, s2) {
+    return get(s1).setNum === get(s2).setNum;
+}
+/**
+ * Create a function that test if a collection of notes is a
+ * subset of a given set
+ *
+ * The function is curryfied.
+ *
+ * @param {PcsetChroma|NoteName[]} set - the superset to test against (chroma or
+ * list of notes)
+ * @return{function(PcsetChroma|NoteNames[]): boolean} a function accepting a set
+ * to test against (chroma or list of notes)
+ * @example
+ * const inCMajor = Pcset.isSubsetOf(["C", "E", "G"])
+ * inCMajor(["e6", "c4"]) // => true
+ * inCMajor(["e6", "c4", "d3"]) // => false
+ */
+function isSubsetOf(set) {
+    const s = get(set).setNum;
+    return (notes) => {
+        const o = get(notes).setNum;
+        // tslint:disable-next-line: no-bitwise
+        return s && s !== o && (o & s) === o;
+    };
+}
+/**
+ * Create a function that test if a collection of notes is a
+ * superset of a given set (it contains all notes and at least one more)
+ *
+ * @param {Set} set - an array of notes or a chroma set string to test against
+ * @return {(subset: Set): boolean} a function that given a set
+ * returns true if is a subset of the first one
+ * @example
+ * const extendsCMajor = Pcset.isSupersetOf(["C", "E", "G"])
+ * extendsCMajor(["e6", "a", "c4", "g2"]) // => true
+ * extendsCMajor(["c6", "e4", "g3"]) // => false
+ */
+function isSupersetOf(set) {
+    const s = get(set).setNum;
+    return (notes) => {
+        const o = get(notes).setNum;
+        // tslint:disable-next-line: no-bitwise
+        return s && s !== o && (o | s) === o;
+    };
+}
+/**
+ * Test if a given pitch class set includes a note
+ *
+ * @param {Array<string>} set - the base set to test against
+ * @param {string} note - the note to test
+ * @return {boolean} true if the note is included in the pcset
+ *
+ * Can be partially applied
+ *
+ * @example
+ * const isNoteInCMajor = isNoteIncludedIn(['C', 'E', 'G'])
+ * isNoteInCMajor('C4') // => true
+ * isNoteInCMajor('C#4') // => false
+ */
+function isNoteIncludedIn(set) {
+    const s = get(set);
+    return (noteName) => {
+        const n = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.note)(noteName);
+        return s && !n.empty && s.chroma.charAt(n.chroma) === "1";
+    };
+}
+/** @deprecated use: isNoteIncludedIn */
+const includes = isNoteIncludedIn;
+/**
+ * Filter a list with a pitch class set
+ *
+ * @param {Array|string} set - the pitch class set notes
+ * @param {Array|string} notes - the note list to be filtered
+ * @return {Array} the filtered notes
+ *
+ * @example
+ * Pcset.filter(["C", "D", "E"], ["c2", "c#2", "d2", "c3", "c#3", "d3"]) // => [ "c2", "d2", "c3", "d3" ])
+ * Pcset.filter(["C2"], ["c2", "c#2", "d2", "c3", "c#3", "d3"]) // => [ "c2", "c3" ])
+ */
+function filter(set) {
+    const isIncluded = isNoteIncludedIn(set);
+    return (notes) => {
+        return notes.filter(isIncluded);
+    };
+}
+var index = {
+    get,
+    chroma,
+    num,
+    intervals,
+    chromas,
+    isSupersetOf,
+    isSubsetOf,
+    isNoteIncludedIn,
+    isEqual,
+    filter,
+    modes,
+    // deprecated
+    pcset,
+};
+//// PRIVATE ////
+function chromaRotations(chroma) {
+    const binary = chroma.split("");
+    return binary.map((_, i) => (0,_tonaljs_collection__WEBPACK_IMPORTED_MODULE_0__.rotate)(i, binary).join(""));
+}
+function chromaToPcset(chroma) {
+    const setNum = chromaToNumber(chroma);
+    const normalizedNum = chromaRotations(chroma)
+        .map(chromaToNumber)
+        .filter((n) => n >= 2048)
+        .sort()[0];
+    const normalized = setNumToChroma(normalizedNum);
+    const intervals = chromaToIntervals(chroma);
+    return {
+        empty: false,
+        name: "",
+        setNum,
+        chroma,
+        normalized,
+        intervals,
+    };
+}
+function listToChroma(set) {
+    if (set.length === 0) {
+        return EmptyPcset.chroma;
+    }
+    let pitch;
+    const binary = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    // tslint:disable-next-line:prefer-for-of
+    for (let i = 0; i < set.length; i++) {
+        pitch = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.note)(set[i]);
+        // tslint:disable-next-line: curly
+        if (pitch.empty)
+            pitch = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.interval)(set[i]);
+        // tslint:disable-next-line: curly
+        if (!pitch.empty)
+            binary[pitch.chroma] = 1;
+    }
+    return binary.join("");
+}
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/progression/dist/index.es.js":
+/*!************************************************************!*\
+  !*** ./node_modules/@tonaljs/progression/dist/index.es.js ***!
+  \************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ index),
+/* harmony export */   "fromRomanNumerals": () => (/* binding */ fromRomanNumerals),
+/* harmony export */   "toRomanNumerals": () => (/* binding */ toRomanNumerals)
+/* harmony export */ });
+/* harmony import */ var _tonaljs_chord__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tonaljs/chord */ "./node_modules/@tonaljs/chord/dist/index.es.js");
+/* harmony import */ var _tonaljs_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tonaljs/core */ "./node_modules/@tonaljs/core/dist/index.es.js");
+/* harmony import */ var _tonaljs_roman_numeral__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @tonaljs/roman-numeral */ "./node_modules/@tonaljs/roman-numeral/dist/index.es.js");
+
+
+
+
+/**
+ * Given a tonic and a chord list expressed with roman numeral notation
+ * returns the progression expressed with leadsheet chords symbols notation
+ * @example
+ * fromRomanNumerals("C", ["I", "IIm7", "V7"]);
+ * // => ["C", "Dm7", "G7"]
+ */
+function fromRomanNumerals(tonic, chords) {
+    const romanNumerals = chords.map(_tonaljs_roman_numeral__WEBPACK_IMPORTED_MODULE_2__.get);
+    return romanNumerals.map((rn) => (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.transpose)(tonic, (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.interval)(rn)) + rn.chordType);
+}
+/**
+ * Given a tonic and a chord list with leadsheet symbols notation,
+ * return the chord list with roman numeral notation
+ * @example
+ * toRomanNumerals("C", ["CMaj7", "Dm7", "G7"]);
+ * // => ["IMaj7", "IIm7", "V7"]
+ */
+function toRomanNumerals(tonic, chords) {
+    return chords.map((chord) => {
+        const [note, chordType] = (0,_tonaljs_chord__WEBPACK_IMPORTED_MODULE_0__.tokenize)(chord);
+        const intervalName = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.distance)(tonic, note);
+        const roman = (0,_tonaljs_roman_numeral__WEBPACK_IMPORTED_MODULE_2__.get)((0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_1__.interval)(intervalName));
+        return roman.name + chordType;
+    });
+}
+var index = { fromRomanNumerals, toRomanNumerals };
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/range/dist/index.es.js":
+/*!******************************************************!*\
+  !*** ./node_modules/@tonaljs/range/dist/index.es.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "chromatic": () => (/* binding */ chromatic),
+/* harmony export */   "default": () => (/* binding */ index),
+/* harmony export */   "numeric": () => (/* binding */ numeric)
+/* harmony export */ });
+/* harmony import */ var _tonaljs_collection__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tonaljs/collection */ "./node_modules/@tonaljs/collection/dist/index.es.js");
+/* harmony import */ var _tonaljs_midi__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tonaljs/midi */ "./node_modules/@tonaljs/midi/dist/index.es.js");
+
+
+
+/**
+ * Create a numeric range. You supply a list of notes or numbers and it will
+ * be connected to create complex ranges.
+ *
+ * @param {Array} notes - the list of notes or midi numbers used
+ * @return {Array} an array of numbers or empty array if not valid parameters
+ *
+ * @example
+ * numeric(["C5", "C4"]) // => [ 72, 71, 70, 69, 68, 67, 66, 65, 64, 63, 62, 61, 60 ]
+ * // it works midi notes
+ * numeric([10, 5]) // => [ 10, 9, 8, 7, 6, 5 ]
+ * // complex range
+ * numeric(["C4", "E4", "Bb3"]) // => [60, 61, 62, 63, 64, 63, 62, 61, 60, 59, 58]
+ */
+function numeric(notes) {
+    const midi = (0,_tonaljs_collection__WEBPACK_IMPORTED_MODULE_0__.compact)(notes.map(_tonaljs_midi__WEBPACK_IMPORTED_MODULE_1__.toMidi));
+    if (!notes.length || midi.length !== notes.length) {
+        // there is no valid notes
+        return [];
+    }
+    return midi.reduce((result, note) => {
+        const last = result[result.length - 1];
+        return result.concat((0,_tonaljs_collection__WEBPACK_IMPORTED_MODULE_0__.range)(last, note).slice(1));
+    }, [midi[0]]);
+}
+/**
+ * Create a range of chromatic notes. The altered notes will use flats.
+ *
+ * @function
+ * @param {Array} notes - the list of notes or midi note numbers to create a range from
+ * @param {Object} options - The same as `midiToNoteName` (`{ sharps: boolean, pitchClass: boolean }`)
+ * @return {Array} an array of note names
+ *
+ * @example
+ * Range.chromatic(["C2, "E2", "D2"]) // => ["C2", "Db2", "D2", "Eb2", "E2", "Eb2", "D2"]
+ * // with sharps
+ * Range.chromatic(["C2", "C3"], { sharps: true }) // => [ "C2", "C#2", "D2", "D#2", "E2", "F2", "F#2", "G2", "G#2", "A2", "A#2", "B2", "C3" ]
+ */
+function chromatic(notes, options) {
+    return numeric(notes).map((midi) => (0,_tonaljs_midi__WEBPACK_IMPORTED_MODULE_1__.midiToNoteName)(midi, options));
+}
+var index = { numeric, chromatic };
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/roman-numeral/dist/index.es.js":
+/*!**************************************************************!*\
+  !*** ./node_modules/@tonaljs/roman-numeral/dist/index.es.js ***!
+  \**************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ index),
+/* harmony export */   "get": () => (/* binding */ get),
+/* harmony export */   "names": () => (/* binding */ names),
+/* harmony export */   "tokenize": () => (/* binding */ tokenize)
+/* harmony export */ });
+/* harmony import */ var _tonaljs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tonaljs/core */ "./node_modules/@tonaljs/core/dist/index.es.js");
+
+
+const NoRomanNumeral = { empty: true, name: "", chordType: "" };
+const cache = {};
+/**
+ * Get properties of a roman numeral string
+ *
+ * @function
+ * @param {string} - the roman numeral string (can have type, like: Imaj7)
+ * @return {Object} - the roman numeral properties
+ * @param {string} name - the roman numeral (tonic)
+ * @param {string} type - the chord type
+ * @param {string} num - the number (1 = I, 2 = II...)
+ * @param {boolean} major - major or not
+ *
+ * @example
+ * romanNumeral("VIIb5") // => { name: "VII", type: "b5", num: 7, major: true }
+ */
+function get(src) {
+    return typeof src === "string"
+        ? cache[src] || (cache[src] = parse(src))
+        : typeof src === "number"
+            ? get(NAMES[src] || "")
+            : (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.isPitch)(src)
+                ? fromPitch(src)
+                : (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.isNamed)(src)
+                    ? get(src.name)
+                    : NoRomanNumeral;
+}
+const romanNumeral = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.deprecate)("RomanNumeral.romanNumeral", "RomanNumeral.get", get);
+/**
+ * Get roman numeral names
+ *
+ * @function
+ * @param {boolean} [isMajor=true]
+ * @return {Array<String>}
+ *
+ * @example
+ * names() // => ["I", "II", "III", "IV", "V", "VI", "VII"]
+ */
+function names(major = true) {
+    return (major ? NAMES : NAMES_MINOR).slice();
+}
+function fromPitch(pitch) {
+    return get((0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.altToAcc)(pitch.alt) + NAMES[pitch.step]);
+}
+const REGEX = /^(#{1,}|b{1,}|x{1,}|)(IV|I{1,3}|VI{0,2}|iv|i{1,3}|vi{0,2})([^IViv]*)$/;
+function tokenize(str) {
+    return (REGEX.exec(str) || ["", "", "", ""]);
+}
+const ROMANS = "I II III IV V VI VII";
+const NAMES = ROMANS.split(" ");
+const NAMES_MINOR = ROMANS.toLowerCase().split(" ");
+function parse(src) {
+    const [name, acc, roman, chordType] = tokenize(src);
+    if (!roman) {
+        return NoRomanNumeral;
+    }
+    const upperRoman = roman.toUpperCase();
+    const step = NAMES.indexOf(upperRoman);
+    const alt = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.accToAlt)(acc);
+    const dir = 1;
+    return {
+        empty: false,
+        name,
+        roman,
+        interval: (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.interval)({ step, alt, dir }).name,
+        acc,
+        chordType,
+        alt,
+        step,
+        major: roman === upperRoman,
+        oct: 0,
+        dir,
+    };
+}
+var index = {
+    names,
+    get,
+    // deprecated
+    romanNumeral,
+};
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/scale-type/dist/index.es.js":
+/*!***********************************************************!*\
+  !*** ./node_modules/@tonaljs/scale-type/dist/index.es.js ***!
+  \***********************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "NoScaleType": () => (/* binding */ NoScaleType),
+/* harmony export */   "add": () => (/* binding */ add),
+/* harmony export */   "addAlias": () => (/* binding */ addAlias),
+/* harmony export */   "all": () => (/* binding */ all),
+/* harmony export */   "default": () => (/* binding */ index$1),
+/* harmony export */   "entries": () => (/* binding */ entries),
+/* harmony export */   "get": () => (/* binding */ get),
+/* harmony export */   "keys": () => (/* binding */ keys),
+/* harmony export */   "names": () => (/* binding */ names),
+/* harmony export */   "removeAll": () => (/* binding */ removeAll),
+/* harmony export */   "scaleType": () => (/* binding */ scaleType)
+/* harmony export */ });
+/* harmony import */ var _tonaljs_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tonaljs/core */ "./node_modules/@tonaljs/core/dist/index.es.js");
+/* harmony import */ var _tonaljs_pcset__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tonaljs/pcset */ "./node_modules/@tonaljs/pcset/dist/index.es.js");
+
+
+
+// SCALES
+// Format: ["intervals", "name", "alias1", "alias2", ...]
+const SCALES = [
+    // 5-note scales
+    ["1P 2M 3M 5P 6M", "major pentatonic", "pentatonic"],
+    ["1P 3M 4P 5P 7M", "ionian pentatonic"],
+    ["1P 3M 4P 5P 7m", "mixolydian pentatonic", "indian"],
+    ["1P 2M 4P 5P 6M", "ritusen"],
+    ["1P 2M 4P 5P 7m", "egyptian"],
+    ["1P 3M 4P 5d 7m", "neopolitan major pentatonic"],
+    ["1P 3m 4P 5P 6m", "vietnamese 1"],
+    ["1P 2m 3m 5P 6m", "pelog"],
+    ["1P 2m 4P 5P 6m", "kumoijoshi"],
+    ["1P 2M 3m 5P 6m", "hirajoshi"],
+    ["1P 2m 4P 5d 7m", "iwato"],
+    ["1P 2m 4P 5P 7m", "in-sen"],
+    ["1P 3M 4A 5P 7M", "lydian pentatonic", "chinese"],
+    ["1P 3m 4P 6m 7m", "malkos raga"],
+    ["1P 3m 4P 5d 7m", "locrian pentatonic", "minor seven flat five pentatonic"],
+    ["1P 3m 4P 5P 7m", "minor pentatonic", "vietnamese 2"],
+    ["1P 3m 4P 5P 6M", "minor six pentatonic"],
+    ["1P 2M 3m 5P 6M", "flat three pentatonic", "kumoi"],
+    ["1P 2M 3M 5P 6m", "flat six pentatonic"],
+    ["1P 2m 3M 5P 6M", "scriabin"],
+    ["1P 3M 5d 6m 7m", "whole tone pentatonic"],
+    ["1P 3M 4A 5A 7M", "lydian #5P pentatonic"],
+    ["1P 3M 4A 5P 7m", "lydian dominant pentatonic"],
+    ["1P 3m 4P 5P 7M", "minor #7M pentatonic"],
+    ["1P 3m 4d 5d 7m", "super locrian pentatonic"],
+    // 6-note scales
+    ["1P 2M 3m 4P 5P 7M", "minor hexatonic"],
+    ["1P 2A 3M 5P 5A 7M", "augmented"],
+    ["1P 2M 3m 3M 5P 6M", "major blues"],
+    ["1P 2M 4P 5P 6M 7m", "piongio"],
+    ["1P 2m 3M 4A 6M 7m", "prometheus neopolitan"],
+    ["1P 2M 3M 4A 6M 7m", "prometheus"],
+    ["1P 2m 3M 5d 6m 7m", "mystery #1"],
+    ["1P 2m 3M 4P 5A 6M", "six tone symmetric"],
+    ["1P 2M 3M 4A 5A 7m", "whole tone", "messiaen's mode #1"],
+    ["1P 2m 4P 4A 5P 7M", "messiaen's mode #5"],
+    ["1P 3m 4P 5d 5P 7m", "minor blues", "blues"],
+    // 7-note scales
+    ["1P 2M 3M 4P 5d 6m 7m", "locrian major", "arabian"],
+    ["1P 2m 3M 4A 5P 6m 7M", "double harmonic lydian"],
+    ["1P 2M 3m 4P 5P 6m 7M", "harmonic minor"],
+    [
+        "1P 2m 2A 3M 4A 6m 7m",
+        "altered",
+        "super locrian",
+        "diminished whole tone",
+        "pomeroy",
+    ],
+    ["1P 2M 3m 4P 5d 6m 7m", "locrian #2", "half-diminished", "aeolian b5"],
+    [
+        "1P 2M 3M 4P 5P 6m 7m",
+        "mixolydian b6",
+        "melodic minor fifth mode",
+        "hindu",
+    ],
+    ["1P 2M 3M 4A 5P 6M 7m", "lydian dominant", "lydian b7", "overtone"],
+    ["1P 2M 3M 4A 5P 6M 7M", "lydian"],
+    ["1P 2M 3M 4A 5A 6M 7M", "lydian augmented"],
+    [
+        "1P 2m 3m 4P 5P 6M 7m",
+        "dorian b2",
+        "phrygian #6",
+        "melodic minor second mode",
+    ],
+    ["1P 2M 3m 4P 5P 6M 7M", "melodic minor"],
+    ["1P 2m 3m 4P 5d 6m 7m", "locrian"],
+    [
+        "1P 2m 3m 4d 5d 6m 7d",
+        "ultralocrian",
+        "superlocrian bb7",
+        "superlocrian diminished",
+    ],
+    ["1P 2m 3m 4P 5d 6M 7m", "locrian 6", "locrian natural 6", "locrian sharp 6"],
+    ["1P 2A 3M 4P 5P 5A 7M", "augmented heptatonic"],
+    // Source https://en.wikipedia.org/wiki/Ukrainian_Dorian_scale
+    [
+        "1P 2M 3m 4A 5P 6M 7m",
+        "dorian #4",
+        "ukrainian dorian",
+        "romanian minor",
+        "altered dorian",
+    ],
+    ["1P 2M 3m 4A 5P 6M 7M", "lydian diminished"],
+    ["1P 2m 3m 4P 5P 6m 7m", "phrygian"],
+    ["1P 2M 3M 4A 5A 7m 7M", "leading whole tone"],
+    ["1P 2M 3M 4A 5P 6m 7m", "lydian minor"],
+    ["1P 2m 3M 4P 5P 6m 7m", "phrygian dominant", "spanish", "phrygian major"],
+    ["1P 2m 3m 4P 5P 6m 7M", "balinese"],
+    ["1P 2m 3m 4P 5P 6M 7M", "neopolitan major"],
+    ["1P 2M 3m 4P 5P 6m 7m", "aeolian", "minor"],
+    ["1P 2M 3M 4P 5P 6m 7M", "harmonic major"],
+    ["1P 2m 3M 4P 5P 6m 7M", "double harmonic major", "gypsy"],
+    ["1P 2M 3m 4P 5P 6M 7m", "dorian"],
+    ["1P 2M 3m 4A 5P 6m 7M", "hungarian minor"],
+    ["1P 2A 3M 4A 5P 6M 7m", "hungarian major"],
+    ["1P 2m 3M 4P 5d 6M 7m", "oriental"],
+    ["1P 2m 3m 3M 4A 5P 7m", "flamenco"],
+    ["1P 2m 3m 4A 5P 6m 7M", "todi raga"],
+    ["1P 2M 3M 4P 5P 6M 7m", "mixolydian", "dominant"],
+    ["1P 2m 3M 4P 5d 6m 7M", "persian"],
+    ["1P 2M 3M 4P 5P 6M 7M", "major", "ionian"],
+    ["1P 2m 3M 5d 6m 7m 7M", "enigmatic"],
+    [
+        "1P 2M 3M 4P 5A 6M 7M",
+        "major augmented",
+        "major #5",
+        "ionian augmented",
+        "ionian #5",
+    ],
+    ["1P 2A 3M 4A 5P 6M 7M", "lydian #9"],
+    // 8-note scales
+    ["1P 2m 2M 4P 4A 5P 6m 7M", "messiaen's mode #4"],
+    ["1P 2m 3M 4P 4A 5P 6m 7M", "purvi raga"],
+    ["1P 2m 3m 3M 4P 5P 6m 7m", "spanish heptatonic"],
+    ["1P 2M 3M 4P 5P 6M 7m 7M", "bebop"],
+    ["1P 2M 3m 3M 4P 5P 6M 7m", "bebop minor"],
+    ["1P 2M 3M 4P 5P 5A 6M 7M", "bebop major"],
+    ["1P 2m 3m 4P 5d 5P 6m 7m", "bebop locrian"],
+    ["1P 2M 3m 4P 5P 6m 7m 7M", "minor bebop"],
+    ["1P 2M 3m 4P 5d 6m 6M 7M", "diminished", "whole-half diminished"],
+    ["1P 2M 3M 4P 5d 5P 6M 7M", "ichikosucho"],
+    ["1P 2M 3m 4P 5P 6m 6M 7M", "minor six diminished"],
+    [
+        "1P 2m 3m 3M 4A 5P 6M 7m",
+        "half-whole diminished",
+        "dominant diminished",
+        "messiaen's mode #2",
+    ],
+    ["1P 3m 3M 4P 5P 6M 7m 7M", "kafi raga"],
+    ["1P 2M 3M 4P 4A 5A 6A 7M", "messiaen's mode #6"],
+    // 9-note scales
+    ["1P 2M 3m 3M 4P 5d 5P 6M 7m", "composite blues"],
+    ["1P 2M 3m 3M 4A 5P 6m 7m 7M", "messiaen's mode #3"],
+    // 10-note scales
+    ["1P 2m 2M 3m 4P 4A 5P 6m 6M 7M", "messiaen's mode #7"],
+    // 12-note scales
+    ["1P 2m 2M 3m 3M 4P 5d 5P 6m 6M 7m 7M", "chromatic"],
+];
+
+const NoScaleType = {
+    ..._tonaljs_pcset__WEBPACK_IMPORTED_MODULE_1__.EmptyPcset,
+    intervals: [],
+    aliases: [],
+};
+let dictionary = [];
+let index = {};
+function names() {
+    return dictionary.map((scale) => scale.name);
+}
+/**
+ * Given a scale name or chroma, return the scale properties
+ *
+ * @param {string} type - scale name or pitch class set chroma
+ * @example
+ * import { get } from 'tonaljs/scale-type'
+ * get('major') // => { name: 'major', ... }
+ */
+function get(type) {
+    return index[type] || NoScaleType;
+}
+const scaleType = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.deprecate)("ScaleDictionary.scaleType", "ScaleType.get", get);
+/**
+ * Return a list of all scale types
+ */
+function all() {
+    return dictionary.slice();
+}
+const entries = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_0__.deprecate)("ScaleDictionary.entries", "ScaleType.all", all);
+/**
+ * Keys used to reference scale types
+ */
+function keys() {
+    return Object.keys(index);
+}
+/**
+ * Clear the dictionary
+ */
+function removeAll() {
+    dictionary = [];
+    index = {};
+}
+/**
+ * Add a scale into dictionary
+ * @param intervals
+ * @param name
+ * @param aliases
+ */
+function add(intervals, name, aliases = []) {
+    const scale = { ...(0,_tonaljs_pcset__WEBPACK_IMPORTED_MODULE_1__.get)(intervals), name, intervals, aliases };
+    dictionary.push(scale);
+    index[scale.name] = scale;
+    index[scale.setNum] = scale;
+    index[scale.chroma] = scale;
+    scale.aliases.forEach((alias) => addAlias(scale, alias));
+    return scale;
+}
+function addAlias(scale, alias) {
+    index[alias] = scale;
+}
+SCALES.forEach(([ivls, name, ...aliases]) => add(ivls.split(" "), name, aliases));
+var index$1 = {
+    names,
+    get,
+    all,
+    add,
+    removeAll,
+    keys,
+    // deprecated
+    entries,
+    scaleType,
+};
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/scale/dist/index.es.js":
+/*!******************************************************!*\
+  !*** ./node_modules/@tonaljs/scale/dist/index.es.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (/* binding */ index),
+/* harmony export */   "extended": () => (/* binding */ extended),
+/* harmony export */   "get": () => (/* binding */ get),
+/* harmony export */   "modeNames": () => (/* binding */ modeNames),
+/* harmony export */   "names": () => (/* binding */ names),
+/* harmony export */   "rangeOf": () => (/* binding */ rangeOf),
+/* harmony export */   "reduced": () => (/* binding */ reduced),
+/* harmony export */   "scale": () => (/* binding */ scale),
+/* harmony export */   "scaleChords": () => (/* binding */ scaleChords),
+/* harmony export */   "scaleNotes": () => (/* binding */ scaleNotes),
+/* harmony export */   "tokenize": () => (/* binding */ tokenize)
+/* harmony export */ });
+/* harmony import */ var _tonaljs_chord_type__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tonaljs/chord-type */ "./node_modules/@tonaljs/chord-type/dist/index.es.js");
+/* harmony import */ var _tonaljs_collection__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tonaljs/collection */ "./node_modules/@tonaljs/collection/dist/index.es.js");
+/* harmony import */ var _tonaljs_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @tonaljs/core */ "./node_modules/@tonaljs/core/dist/index.es.js");
+/* harmony import */ var _tonaljs_note__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @tonaljs/note */ "./node_modules/@tonaljs/note/dist/index.es.js");
+/* harmony import */ var _tonaljs_pcset__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @tonaljs/pcset */ "./node_modules/@tonaljs/pcset/dist/index.es.js");
+/* harmony import */ var _tonaljs_scale_type__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @tonaljs/scale-type */ "./node_modules/@tonaljs/scale-type/dist/index.es.js");
+
+
+
+
+
+
+
+/**
+ * References:
+ * - https://www.researchgate.net/publication/327567188_An_Algorithm_for_Spelling_the_Pitches_of_Any_Musical_Scale
+ * @module scale
+ */
+const NoScale = {
+    empty: true,
+    name: "",
+    type: "",
+    tonic: null,
+    setNum: NaN,
+    chroma: "",
+    normalized: "",
+    aliases: [],
+    notes: [],
+    intervals: [],
+};
+/**
+ * Given a string with a scale name and (optionally) a tonic, split
+ * that components.
+ *
+ * It retuns an array with the form [ name, tonic ] where tonic can be a
+ * note name or null and name can be any arbitrary string
+ * (this function doesn"t check if that scale name exists)
+ *
+ * @function
+ * @param {string} name - the scale name
+ * @return {Array} an array [tonic, name]
+ * @example
+ * tokenize("C mixolydean") // => ["C", "mixolydean"]
+ * tokenize("anything is valid") // => ["", "anything is valid"]
+ * tokenize() // => ["", ""]
+ */
+function tokenize(name) {
+    if (typeof name !== "string") {
+        return ["", ""];
+    }
+    const i = name.indexOf(" ");
+    const tonic = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.note)(name.substring(0, i));
+    if (tonic.empty) {
+        const n = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.note)(name);
+        return n.empty ? ["", name] : [n.name, ""];
+    }
+    const type = name.substring(tonic.name.length + 1);
+    return [tonic.name, type.length ? type : ""];
+}
+/**
+ * Get all scale names
+ * @function
+ */
+const names = _tonaljs_scale_type__WEBPACK_IMPORTED_MODULE_5__.names;
+/**
+ * Get a Scale from a scale name.
+ */
+function get(src) {
+    const tokens = Array.isArray(src) ? src : tokenize(src);
+    const tonic = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.note)(tokens[0]).name;
+    const st = (0,_tonaljs_scale_type__WEBPACK_IMPORTED_MODULE_5__.get)(tokens[1]);
+    if (st.empty) {
+        return NoScale;
+    }
+    const type = st.name;
+    const notes = tonic
+        ? st.intervals.map((i) => (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.transpose)(tonic, i))
+        : [];
+    const name = tonic ? tonic + " " + type : type;
+    return { ...st, name, type, tonic, notes };
+}
+const scale = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.deprecate)("Scale.scale", "Scale.get", get);
+/**
+ * Get all chords that fits a given scale
+ *
+ * @function
+ * @param {string} name - the scale name
+ * @return {Array<string>} - the chord names
+ *
+ * @example
+ * scaleChords("pentatonic") // => ["5", "64", "M", "M6", "Madd9", "Msus2"]
+ */
+function scaleChords(name) {
+    const s = get(name);
+    const inScale = (0,_tonaljs_pcset__WEBPACK_IMPORTED_MODULE_4__.isSubsetOf)(s.chroma);
+    return (0,_tonaljs_chord_type__WEBPACK_IMPORTED_MODULE_0__.all)()
+        .filter((chord) => inScale(chord.chroma))
+        .map((chord) => chord.aliases[0]);
+}
+/**
+ * Get all scales names that are a superset of the given one
+ * (has the same notes and at least one more)
+ *
+ * @function
+ * @param {string} name
+ * @return {Array} a list of scale names
+ * @example
+ * extended("major") // => ["bebop", "bebop dominant", "bebop major", "chromatic", "ichikosucho"]
+ */
+function extended(name) {
+    const s = get(name);
+    const isSuperset = (0,_tonaljs_pcset__WEBPACK_IMPORTED_MODULE_4__.isSupersetOf)(s.chroma);
+    return (0,_tonaljs_scale_type__WEBPACK_IMPORTED_MODULE_5__.all)()
+        .filter((scale) => isSuperset(scale.chroma))
+        .map((scale) => scale.name);
+}
+/**
+ * Find all scales names that are a subset of the given one
+ * (has less notes but all from the given scale)
+ *
+ * @function
+ * @param {string} name
+ * @return {Array} a list of scale names
+ *
+ * @example
+ * reduced("major") // => ["ionian pentatonic", "major pentatonic", "ritusen"]
+ */
+function reduced(name) {
+    const isSubset = (0,_tonaljs_pcset__WEBPACK_IMPORTED_MODULE_4__.isSubsetOf)(get(name).chroma);
+    return (0,_tonaljs_scale_type__WEBPACK_IMPORTED_MODULE_5__.all)()
+        .filter((scale) => isSubset(scale.chroma))
+        .map((scale) => scale.name);
+}
+/**
+ * Given an array of notes, return the scale: a pitch class set starting from
+ * the first note of the array
+ *
+ * @function
+ * @param {string[]} notes
+ * @return {string[]} pitch classes with same tonic
+ * @example
+ * scaleNotes(['C4', 'c3', 'C5', 'C4', 'c4']) // => ["C"]
+ * scaleNotes(['D4', 'c#5', 'A5', 'F#6']) // => ["D", "F#", "A", "C#"]
+ */
+function scaleNotes(notes) {
+    const pcset = notes.map((n) => (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.note)(n).pc).filter((x) => x);
+    const tonic = pcset[0];
+    const scale = (0,_tonaljs_note__WEBPACK_IMPORTED_MODULE_3__.sortedUniqNames)(pcset);
+    return (0,_tonaljs_collection__WEBPACK_IMPORTED_MODULE_1__.rotate)(scale.indexOf(tonic), scale);
+}
+/**
+ * Find mode names of a scale
+ *
+ * @function
+ * @param {string} name - scale name
+ * @example
+ * modeNames("C pentatonic") // => [
+ *   ["C", "major pentatonic"],
+ *   ["D", "egyptian"],
+ *   ["E", "malkos raga"],
+ *   ["G", "ritusen"],
+ *   ["A", "minor pentatonic"]
+ * ]
+ */
+function modeNames(name) {
+    const s = get(name);
+    if (s.empty) {
+        return [];
+    }
+    const tonics = s.tonic ? s.notes : s.intervals;
+    return (0,_tonaljs_pcset__WEBPACK_IMPORTED_MODULE_4__.modes)(s.chroma)
+        .map((chroma, i) => {
+        const modeName = get(chroma).name;
+        return modeName ? [tonics[i], modeName] : ["", ""];
+    })
+        .filter((x) => x[0]);
+}
+function getNoteNameOf(scale) {
+    const names = Array.isArray(scale) ? scaleNotes(scale) : get(scale).notes;
+    const chromas = names.map((name) => (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.note)(name).chroma);
+    return (noteOrMidi) => {
+        const currNote = typeof noteOrMidi === "number"
+            ? (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.note)((0,_tonaljs_note__WEBPACK_IMPORTED_MODULE_3__.fromMidi)(noteOrMidi))
+            : (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.note)(noteOrMidi);
+        const height = currNote.height;
+        if (height === undefined)
+            return undefined;
+        const chroma = height % 12;
+        const position = chromas.indexOf(chroma);
+        if (position === -1)
+            return undefined;
+        return (0,_tonaljs_note__WEBPACK_IMPORTED_MODULE_3__.enharmonic)(currNote.name, names[position]);
+    };
+}
+function rangeOf(scale) {
+    const getName = getNoteNameOf(scale);
+    return (fromNote, toNote) => {
+        const from = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.note)(fromNote).height;
+        const to = (0,_tonaljs_core__WEBPACK_IMPORTED_MODULE_2__.note)(toNote).height;
+        if (from === undefined || to === undefined)
+            return [];
+        return (0,_tonaljs_collection__WEBPACK_IMPORTED_MODULE_1__.range)(from, to)
+            .map(getName)
+            .filter((x) => x);
+    };
+}
+var index = {
+    get,
+    names,
+    extended,
+    modeNames,
+    reduced,
+    scaleChords,
+    scaleNotes,
+    tokenize,
+    rangeOf,
+    // deprecated
+    scale,
+};
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/time-signature/dist/index.es.js":
+/*!***************************************************************!*\
+  !*** ./node_modules/@tonaljs/time-signature/dist/index.es.js ***!
+  \***************************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__),
+/* harmony export */   "get": () => (/* binding */ get),
+/* harmony export */   "names": () => (/* binding */ names),
+/* harmony export */   "parse": () => (/* binding */ parse)
+/* harmony export */ });
+// CONSTANTS
+const NONE = {
+    empty: true,
+    name: "",
+    upper: undefined,
+    lower: undefined,
+    type: undefined,
+    additive: [],
+};
+const NAMES = ["4/4", "3/4", "2/4", "2/2", "12/8", "9/8", "6/8", "3/8"];
+// PUBLIC API
+function names() {
+    return NAMES.slice();
+}
+const REGEX = /^(\d?\d(?:\+\d)*)\/(\d)$/;
+const CACHE = new Map();
+function get(literal) {
+    const cached = CACHE.get(literal);
+    if (cached) {
+        return cached;
+    }
+    const ts = build(parse(literal));
+    CACHE.set(literal, ts);
+    return ts;
+}
+function parse(literal) {
+    if (typeof literal === "string") {
+        const [_, up, low] = REGEX.exec(literal) || [];
+        return parse([up, low]);
+    }
+    const [up, down] = literal;
+    const denominator = +down;
+    if (typeof up === "number") {
+        return [up, denominator];
+    }
+    const list = up.split("+").map((n) => +n);
+    return list.length === 1 ? [list[0], denominator] : [list, denominator];
+}
+var index = { names, parse, get };
+// PRIVATE
+function build([up, down]) {
+    const upper = Array.isArray(up) ? up.reduce((a, b) => a + b, 0) : up;
+    const lower = down;
+    if (upper === 0 || lower === 0) {
+        return NONE;
+    }
+    const name = Array.isArray(up) ? `${up.join("+")}/${down}` : `${up}/${down}`;
+    const additive = Array.isArray(up) ? up : [];
+    const type = lower === 4 || lower === 2
+        ? "simple"
+        : lower === 8 && upper % 3 === 0
+            ? "compound"
+            : "irregular";
+    return {
+        empty: false,
+        name,
+        type,
+        upper,
+        lower,
+        additive,
+    };
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (index);
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/@tonaljs/tonal/dist/index.es.js":
+/*!******************************************************!*\
+  !*** ./node_modules/@tonaljs/tonal/dist/index.es.js ***!
+  \******************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "AbcNotation": () => (/* reexport safe */ _tonaljs_abc_notation__WEBPACK_IMPORTED_MODULE_0__["default"]),
+/* harmony export */   "Array": () => (/* reexport module object */ _tonaljs_array__WEBPACK_IMPORTED_MODULE_1__),
+/* harmony export */   "Chord": () => (/* reexport safe */ _tonaljs_chord__WEBPACK_IMPORTED_MODULE_2__["default"]),
+/* harmony export */   "ChordDictionary": () => (/* binding */ ChordDictionary),
+/* harmony export */   "ChordType": () => (/* reexport safe */ _tonaljs_chord_type__WEBPACK_IMPORTED_MODULE_3__["default"]),
+/* harmony export */   "Collection": () => (/* reexport safe */ _tonaljs_collection__WEBPACK_IMPORTED_MODULE_4__["default"]),
+/* harmony export */   "Core": () => (/* reexport module object */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__),
+/* harmony export */   "DurationValue": () => (/* reexport safe */ _tonaljs_duration_value__WEBPACK_IMPORTED_MODULE_6__["default"]),
+/* harmony export */   "Interval": () => (/* reexport safe */ _tonaljs_interval__WEBPACK_IMPORTED_MODULE_7__["default"]),
+/* harmony export */   "Key": () => (/* reexport safe */ _tonaljs_key__WEBPACK_IMPORTED_MODULE_8__["default"]),
+/* harmony export */   "Midi": () => (/* reexport safe */ _tonaljs_midi__WEBPACK_IMPORTED_MODULE_9__["default"]),
+/* harmony export */   "Mode": () => (/* reexport safe */ _tonaljs_mode__WEBPACK_IMPORTED_MODULE_10__["default"]),
+/* harmony export */   "Note": () => (/* reexport safe */ _tonaljs_note__WEBPACK_IMPORTED_MODULE_11__["default"]),
+/* harmony export */   "PcSet": () => (/* binding */ PcSet),
+/* harmony export */   "Pcset": () => (/* reexport safe */ _tonaljs_pcset__WEBPACK_IMPORTED_MODULE_12__["default"]),
+/* harmony export */   "Progression": () => (/* reexport safe */ _tonaljs_progression__WEBPACK_IMPORTED_MODULE_13__["default"]),
+/* harmony export */   "Range": () => (/* reexport safe */ _tonaljs_range__WEBPACK_IMPORTED_MODULE_14__["default"]),
+/* harmony export */   "RomanNumeral": () => (/* reexport safe */ _tonaljs_roman_numeral__WEBPACK_IMPORTED_MODULE_15__["default"]),
+/* harmony export */   "Scale": () => (/* reexport safe */ _tonaljs_scale__WEBPACK_IMPORTED_MODULE_16__["default"]),
+/* harmony export */   "ScaleDictionary": () => (/* binding */ ScaleDictionary),
+/* harmony export */   "ScaleType": () => (/* reexport safe */ _tonaljs_scale_type__WEBPACK_IMPORTED_MODULE_17__["default"]),
+/* harmony export */   "TimeSignature": () => (/* reexport safe */ _tonaljs_time_signature__WEBPACK_IMPORTED_MODULE_18__["default"]),
+/* harmony export */   "Tonal": () => (/* binding */ Tonal),
+/* harmony export */   "accToAlt": () => (/* reexport safe */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__.accToAlt),
+/* harmony export */   "altToAcc": () => (/* reexport safe */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__.altToAcc),
+/* harmony export */   "coordToInterval": () => (/* reexport safe */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__.coordToInterval),
+/* harmony export */   "coordToNote": () => (/* reexport safe */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__.coordToNote),
+/* harmony export */   "decode": () => (/* reexport safe */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__.decode),
+/* harmony export */   "deprecate": () => (/* reexport safe */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__.deprecate),
+/* harmony export */   "distance": () => (/* reexport safe */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__.distance),
+/* harmony export */   "encode": () => (/* reexport safe */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__.encode),
+/* harmony export */   "fillStr": () => (/* reexport safe */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__.fillStr),
+/* harmony export */   "interval": () => (/* reexport safe */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__.interval),
+/* harmony export */   "isNamed": () => (/* reexport safe */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__.isNamed),
+/* harmony export */   "isPitch": () => (/* reexport safe */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__.isPitch),
+/* harmony export */   "note": () => (/* reexport safe */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__.note),
+/* harmony export */   "stepToLetter": () => (/* reexport safe */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__.stepToLetter),
+/* harmony export */   "tokenizeInterval": () => (/* reexport safe */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__.tokenizeInterval),
+/* harmony export */   "tokenizeNote": () => (/* reexport safe */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__.tokenizeNote),
+/* harmony export */   "transpose": () => (/* reexport safe */ _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__.transpose)
+/* harmony export */ });
+/* harmony import */ var _tonaljs_abc_notation__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @tonaljs/abc-notation */ "./node_modules/@tonaljs/abc-notation/dist/index.es.js");
+/* harmony import */ var _tonaljs_array__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tonaljs/array */ "./node_modules/@tonaljs/array/dist/index.es.js");
+/* harmony import */ var _tonaljs_chord__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @tonaljs/chord */ "./node_modules/@tonaljs/chord/dist/index.es.js");
+/* harmony import */ var _tonaljs_chord_type__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @tonaljs/chord-type */ "./node_modules/@tonaljs/chord-type/dist/index.es.js");
+/* harmony import */ var _tonaljs_collection__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @tonaljs/collection */ "./node_modules/@tonaljs/collection/dist/index.es.js");
+/* harmony import */ var _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! @tonaljs/core */ "./node_modules/@tonaljs/core/dist/index.es.js");
+/* harmony import */ var _tonaljs_duration_value__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @tonaljs/duration-value */ "./node_modules/@tonaljs/duration-value/dist/index.es.js");
+/* harmony import */ var _tonaljs_interval__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! @tonaljs/interval */ "./node_modules/@tonaljs/interval/dist/index.es.js");
+/* harmony import */ var _tonaljs_key__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @tonaljs/key */ "./node_modules/@tonaljs/key/dist/index.es.js");
+/* harmony import */ var _tonaljs_midi__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @tonaljs/midi */ "./node_modules/@tonaljs/midi/dist/index.es.js");
+/* harmony import */ var _tonaljs_mode__WEBPACK_IMPORTED_MODULE_10__ = __webpack_require__(/*! @tonaljs/mode */ "./node_modules/@tonaljs/mode/dist/index.es.js");
+/* harmony import */ var _tonaljs_note__WEBPACK_IMPORTED_MODULE_11__ = __webpack_require__(/*! @tonaljs/note */ "./node_modules/@tonaljs/note/dist/index.es.js");
+/* harmony import */ var _tonaljs_pcset__WEBPACK_IMPORTED_MODULE_12__ = __webpack_require__(/*! @tonaljs/pcset */ "./node_modules/@tonaljs/pcset/dist/index.es.js");
+/* harmony import */ var _tonaljs_progression__WEBPACK_IMPORTED_MODULE_13__ = __webpack_require__(/*! @tonaljs/progression */ "./node_modules/@tonaljs/progression/dist/index.es.js");
+/* harmony import */ var _tonaljs_range__WEBPACK_IMPORTED_MODULE_14__ = __webpack_require__(/*! @tonaljs/range */ "./node_modules/@tonaljs/range/dist/index.es.js");
+/* harmony import */ var _tonaljs_roman_numeral__WEBPACK_IMPORTED_MODULE_15__ = __webpack_require__(/*! @tonaljs/roman-numeral */ "./node_modules/@tonaljs/roman-numeral/dist/index.es.js");
+/* harmony import */ var _tonaljs_scale__WEBPACK_IMPORTED_MODULE_16__ = __webpack_require__(/*! @tonaljs/scale */ "./node_modules/@tonaljs/scale/dist/index.es.js");
+/* harmony import */ var _tonaljs_scale_type__WEBPACK_IMPORTED_MODULE_17__ = __webpack_require__(/*! @tonaljs/scale-type */ "./node_modules/@tonaljs/scale-type/dist/index.es.js");
+/* harmony import */ var _tonaljs_time_signature__WEBPACK_IMPORTED_MODULE_18__ = __webpack_require__(/*! @tonaljs/time-signature */ "./node_modules/@tonaljs/time-signature/dist/index.es.js");
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// deprecated (backwards compatibility)
+const Tonal = _tonaljs_core__WEBPACK_IMPORTED_MODULE_5__;
+const PcSet = _tonaljs_pcset__WEBPACK_IMPORTED_MODULE_12__["default"];
+const ChordDictionary = _tonaljs_chord_type__WEBPACK_IMPORTED_MODULE_3__["default"];
+const ScaleDictionary = _tonaljs_scale_type__WEBPACK_IMPORTED_MODULE_17__["default"];
+
+
+//# sourceMappingURL=index.es.js.map
+
+
+/***/ }),
+
 /***/ "./node_modules/axios/index.js":
 /*!*************************************!*\
   !*** ./node_modules/axios/index.js ***!
@@ -4260,15 +7889,56 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
 
 
+
 function ApplicationLogo(_ref) {
   var className = _ref.className;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("svg", {
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsxs)("svg", {
     className: className,
-    viewBox: "0 0 316 316",
     xmlns: "http://www.w3.org/2000/svg",
-    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
-      d: "M305.8 81.125C305.77 80.995 305.69 80.885 305.65 80.755C305.56 80.525 305.49 80.285 305.37 80.075C305.29 79.935 305.17 79.815 305.07 79.685C304.94 79.515 304.83 79.325 304.68 79.175C304.55 79.045 304.39 78.955 304.25 78.845C304.09 78.715 303.95 78.575 303.77 78.475L251.32 48.275C249.97 47.495 248.31 47.495 246.96 48.275L194.51 78.475C194.33 78.575 194.19 78.725 194.03 78.845C193.89 78.955 193.73 79.045 193.6 79.175C193.45 79.325 193.34 79.515 193.21 79.685C193.11 79.815 192.99 79.935 192.91 80.075C192.79 80.285 192.71 80.525 192.63 80.755C192.58 80.875 192.51 80.995 192.48 81.125C192.38 81.495 192.33 81.875 192.33 82.265V139.625L148.62 164.795V52.575C148.62 52.185 148.57 51.805 148.47 51.435C148.44 51.305 148.36 51.195 148.32 51.065C148.23 50.835 148.16 50.595 148.04 50.385C147.96 50.245 147.84 50.125 147.74 49.995C147.61 49.825 147.5 49.635 147.35 49.485C147.22 49.355 147.06 49.265 146.92 49.155C146.76 49.025 146.62 48.885 146.44 48.785L93.99 18.585C92.64 17.805 90.98 17.805 89.63 18.585L37.18 48.785C37 48.885 36.86 49.035 36.7 49.155C36.56 49.265 36.4 49.355 36.27 49.485C36.12 49.635 36.01 49.825 35.88 49.995C35.78 50.125 35.66 50.245 35.58 50.385C35.46 50.595 35.38 50.835 35.3 51.065C35.25 51.185 35.18 51.305 35.15 51.435C35.05 51.805 35 52.185 35 52.575V232.235C35 233.795 35.84 235.245 37.19 236.025L142.1 296.425C142.33 296.555 142.58 296.635 142.82 296.725C142.93 296.765 143.04 296.835 143.16 296.865C143.53 296.965 143.9 297.015 144.28 297.015C144.66 297.015 145.03 296.965 145.4 296.865C145.5 296.835 145.59 296.775 145.69 296.745C145.95 296.655 146.21 296.565 146.45 296.435L251.36 236.035C252.72 235.255 253.55 233.815 253.55 232.245V174.885L303.81 145.945C305.17 145.165 306 143.725 306 142.155V82.265C305.95 81.875 305.89 81.495 305.8 81.125ZM144.2 227.205L100.57 202.515L146.39 176.135L196.66 147.195L240.33 172.335L208.29 190.625L144.2 227.205ZM244.75 114.995V164.795L226.39 154.225L201.03 139.625V89.825L219.39 100.395L244.75 114.995ZM249.12 57.105L292.81 82.265L249.12 107.425L205.43 82.265L249.12 57.105ZM114.49 184.425L96.13 194.995V85.305L121.49 70.705L139.85 60.135V169.815L114.49 184.425ZM91.76 27.425L135.45 52.585L91.76 77.745L48.07 52.585L91.76 27.425ZM43.67 60.135L62.03 70.705L87.39 85.305V202.545V202.555V202.565C87.39 202.735 87.44 202.895 87.46 203.055C87.49 203.265 87.49 203.485 87.55 203.695V203.705C87.6 203.875 87.69 204.035 87.76 204.195C87.84 204.375 87.89 204.575 87.99 204.745C87.99 204.745 87.99 204.755 88 204.755C88.09 204.905 88.22 205.035 88.33 205.175C88.45 205.335 88.55 205.495 88.69 205.635L88.7 205.645C88.82 205.765 88.98 205.855 89.12 205.965C89.28 206.085 89.42 206.225 89.59 206.325C89.6 206.325 89.6 206.325 89.61 206.335C89.62 206.335 89.62 206.345 89.63 206.345L139.87 234.775V285.065L43.67 229.705V60.135ZM244.75 229.705L148.58 285.075V234.775L219.8 194.115L244.75 179.875V229.705ZM297.2 139.625L253.49 164.795V114.995L278.85 100.395L297.21 89.825V139.625H297.2Z"
-    })
+    width: "146",
+    height: "26",
+    viewBox: "0 0 146 26",
+    fill: "fill-current",
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+      d: "M29.3938 21.3093V4.21191H34.8059C35.8308 4.21191 36.6661 4.40892 37.3119 4.80293C37.9577 5.18287 38.4351 5.73872 38.7439 6.47046C39.0668 7.2022 39.2283 8.08873 39.2283 9.13006C39.2283 10.3543 39.0177 11.3112 38.5965 12.0007C38.1894 12.6903 37.6278 13.1828 36.9118 13.4783C36.1958 13.7597 35.3745 13.9005 34.4479 13.9005H32.8685V21.3093H29.3938ZM32.8685 11.4519H34.0899C34.5953 11.4519 34.9814 11.3745 35.2482 11.2197C35.5289 11.0509 35.7185 10.7906 35.8167 10.4388C35.915 10.087 35.9642 9.63665 35.9642 9.08784C35.9642 8.56718 35.922 8.13095 35.8378 7.77915C35.7676 7.42735 35.5991 7.15295 35.3324 6.95594C35.0656 6.75893 34.6445 6.66043 34.0689 6.66043H32.8685V11.4519Z",
+      fill: "#605F5F"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+      d: "M45.8146 21.5415C44.523 21.5415 43.5192 21.3234 42.8032 20.8872C42.0872 20.4369 41.5818 19.7966 41.287 18.9664C41.0062 18.122 40.8658 17.1018 40.8658 15.9057V4.21191H44.2984V16.3912C44.2984 16.8134 44.3265 17.2285 44.3826 17.6366C44.4528 18.0447 44.5932 18.3753 44.8038 18.6286C45.0284 18.8819 45.3654 19.0086 45.8146 19.0086C46.2779 19.0086 46.6149 18.8819 46.8255 18.6286C47.0501 18.3753 47.1905 18.0447 47.2466 17.6366C47.3028 17.2285 47.3309 16.8134 47.3309 16.3912V4.21191H50.7635V15.9057C50.7635 17.1018 50.6161 18.122 50.3212 18.9664C50.0405 19.7966 49.5421 20.4369 48.8261 20.8872C48.1101 21.3234 47.1062 21.5415 45.8146 21.5415Z",
+      fill: "#605F5F"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+      d: "M57.6103 21.5415C56.5573 21.5415 55.6799 21.3516 54.9779 20.9716C54.2759 20.5776 53.7424 19.9936 53.3774 19.2197C53.0264 18.4316 52.8229 17.4325 52.7667 16.2223L55.7571 15.7157C55.7852 16.4193 55.8554 17.0104 55.9677 17.4888C56.094 17.9532 56.2765 18.305 56.5152 18.5442C56.7679 18.7694 57.0768 18.8819 57.4418 18.8819C57.891 18.8819 58.1929 18.7412 58.3473 18.4598C58.5158 18.1783 58.6 17.8547 58.6 17.4888C58.6 16.7711 58.4245 16.1731 58.0736 15.6946C57.7366 15.2021 57.2874 14.7096 56.7258 14.2171L54.9568 12.6762C54.3251 12.1415 53.8056 11.5364 53.3985 10.8609C53.0054 10.1855 52.8088 9.35521 52.8088 8.37017C52.8088 6.96298 53.216 5.88647 54.0302 5.14066C54.8586 4.38077 55.9887 4.00083 57.4207 4.00083C58.2771 4.00083 58.9791 4.14155 59.5266 4.42299C60.0742 4.70443 60.4953 5.08437 60.7902 5.56282C61.099 6.02719 61.3096 6.54082 61.4219 7.1037C61.5483 7.6525 61.6255 8.20131 61.6536 8.75012L58.6843 9.19338C58.6562 8.67272 58.607 8.21538 58.5369 7.82137C58.4807 7.42735 58.3543 7.11777 58.1578 6.89262C57.9753 6.66747 57.6945 6.55489 57.3154 6.55489C56.9083 6.55489 56.6065 6.70968 56.4099 7.01927C56.2134 7.31478 56.1151 7.64547 56.1151 8.01134C56.1151 8.61643 56.2484 9.11599 56.5152 9.51C56.796 9.88995 57.175 10.291 57.6524 10.7132L59.3792 12.2329C60.0952 12.8521 60.7059 13.5627 61.2113 14.3648C61.7308 15.1529 61.9905 16.1309 61.9905 17.2988C61.9905 18.1009 61.808 18.8256 61.443 19.473C61.078 20.1203 60.5655 20.6269 59.9057 20.9927C59.2599 21.3586 58.4947 21.5415 57.6103 21.5415Z",
+      fill: "#605F5F"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+      d: "M63.8623 21.3093V4.21191H67.337V11.2409H70.3484V4.21191H73.8232V21.3093H70.3484V13.7316H67.337V21.3093H63.8623Z",
+      fill: "#605F5F"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+      d: "M81.1856 21.5415C79.922 21.5415 78.9182 21.3023 78.1741 20.8239C77.4441 20.3454 76.9317 19.684 76.6368 18.8397C76.342 17.9813 76.1946 16.9893 76.1946 15.8635V9.72108C76.1946 8.53904 76.342 7.52586 76.6368 6.68154C76.9317 5.82315 77.4441 5.16177 78.1741 4.69739C78.9182 4.23302 79.922 4.00083 81.1856 4.00083C82.407 4.00083 83.3616 4.20487 84.0496 4.61296C84.7515 5.02105 85.2429 5.598 85.5237 6.34381C85.8185 7.08963 85.9659 7.95505 85.9659 8.94009V10.3754H82.5965V8.77122C82.5965 8.37721 82.5755 8.01134 82.5333 7.67361C82.4912 7.32181 82.3719 7.04037 82.1753 6.82929C81.9928 6.60414 81.6699 6.49157 81.2066 6.49157C80.7433 6.49157 80.4064 6.60414 80.1958 6.82929C79.9852 7.05445 79.8518 7.34996 79.7957 7.71583C79.7395 8.06763 79.7114 8.46164 79.7114 8.89787V16.6656C79.7114 17.144 79.7465 17.5662 79.8167 17.9321C79.901 18.2839 80.0484 18.5583 80.259 18.7553C80.4836 18.9382 80.7995 19.0297 81.2066 19.0297C81.6559 19.0297 81.9718 18.9241 82.1543 18.7131C82.3508 18.4879 82.4702 18.1924 82.5123 17.8265C82.5684 17.4607 82.5965 17.0737 82.5965 16.6656V14.9981H85.9659V16.4123C85.9659 17.4114 85.8255 18.2979 85.5448 19.0719C85.264 19.8318 84.7796 20.4369 84.0917 20.8872C83.4038 21.3234 82.4351 21.5415 81.1856 21.5415Z",
+      fill: "#605F5F"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+      d: "M88.1294 21.3093V4.21191H91.6041V11.2409H94.6156V4.21191H98.0903V21.3093H94.6156V13.7316H91.6041V21.3093H88.1294Z",
+      fill: "#605F5F"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+      d: "M105.474 21.5415C104.224 21.5415 103.234 21.3164 102.504 20.8661C101.774 20.4158 101.248 19.7755 100.925 18.9453C100.616 18.1009 100.462 17.0948 100.462 15.9268V9.55222C100.462 8.38425 100.616 7.38514 100.925 6.55489C101.248 5.72464 101.774 5.09141 102.504 4.65518C103.234 4.21894 104.224 4.00083 105.474 4.00083C106.737 4.00083 107.734 4.22598 108.464 4.67628C109.208 5.11251 109.735 5.74575 110.044 6.576C110.366 7.39217 110.528 8.38425 110.528 9.55222V15.9268C110.528 17.0948 110.366 18.1009 110.044 18.9453C109.735 19.7755 109.208 20.4158 108.464 20.8661C107.734 21.3164 106.737 21.5415 105.474 21.5415ZM105.474 19.0297C105.923 19.0297 106.253 18.9312 106.464 18.7342C106.674 18.5231 106.814 18.2487 106.885 17.911C106.955 17.5592 106.99 17.1863 106.99 16.7922V8.7079C106.99 8.31389 106.955 7.94802 106.885 7.61029C106.814 7.27256 106.674 7.00519 106.464 6.80819C106.253 6.59711 105.923 6.49157 105.474 6.49157C105.053 6.49157 104.737 6.59711 104.526 6.80819C104.315 7.00519 104.175 7.27256 104.105 7.61029C104.035 7.94802 104 8.31389 104 8.7079V16.7922C104 17.1863 104.028 17.5592 104.084 17.911C104.154 18.2487 104.294 18.5231 104.505 18.7342C104.716 18.9312 105.039 19.0297 105.474 19.0297Z",
+      fill: "#605F5F"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+      d: "M112.848 21.3093V4.21191H117.27C118.422 4.21191 119.404 4.34559 120.219 4.61296C121.047 4.86625 121.679 5.32359 122.114 5.98498C122.563 6.64636 122.788 7.56104 122.788 8.72901C122.788 9.43261 122.725 10.0588 122.598 10.6076C122.486 11.1424 122.275 11.6138 121.967 12.0218C121.672 12.4159 121.25 12.7325 120.703 12.9717L123.062 21.3093H119.503L117.544 13.5627H116.323V21.3093H112.848ZM116.323 11.4941H117.334C117.895 11.4941 118.337 11.4027 118.66 11.2197C118.983 11.0368 119.208 10.7624 119.334 10.3965C119.475 10.0166 119.545 9.55222 119.545 9.00341C119.545 8.21538 119.397 7.61732 119.102 7.20924C118.822 6.78708 118.288 6.576 117.502 6.576H116.323V11.4941Z",
+      fill: "#605F5F"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+      d: "M125.125 21.3093V4.21191H129.295C130.741 4.21191 131.864 4.40188 132.665 4.78182C133.479 5.14769 134.054 5.73168 134.391 6.53378C134.728 7.32181 134.897 8.33499 134.897 9.57333V15.8002C134.897 17.0666 134.728 18.108 134.391 18.9241C134.054 19.7403 133.486 20.3454 132.686 20.7394C131.899 21.1194 130.797 21.3093 129.379 21.3093H125.125ZM128.6 18.8819H129.337C129.983 18.8819 130.439 18.7834 130.706 18.5864C130.987 18.3753 131.162 18.0728 131.233 17.6788C131.303 17.2707 131.338 16.7711 131.338 16.1801V9.13006C131.338 8.53904 131.289 8.06763 131.19 7.71583C131.106 7.34996 130.924 7.08259 130.643 6.91373C130.376 6.74486 129.934 6.66043 129.316 6.66043H128.6V18.8819Z",
+      fill: "#605F5F"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+      d: "M141.62 21.5415C140.567 21.5415 139.689 21.3516 138.987 20.9716C138.285 20.5776 137.752 19.9936 137.387 19.2197C137.036 18.4316 136.832 17.4325 136.776 16.2223L139.767 15.7157C139.795 16.4193 139.865 17.0104 139.977 17.4888C140.103 17.9532 140.286 18.305 140.525 18.5442C140.777 18.7694 141.086 18.8819 141.451 18.8819C141.901 18.8819 142.202 18.7412 142.357 18.4598C142.525 18.1783 142.61 17.8547 142.61 17.4888C142.61 16.7711 142.434 16.1731 142.083 15.6946C141.746 15.2021 141.297 14.7096 140.735 14.2171L138.966 12.6762C138.335 12.1415 137.815 11.5364 137.408 10.8609C137.015 10.1855 136.818 9.35521 136.818 8.37017C136.818 6.96298 137.225 5.88647 138.04 5.14066C138.868 4.38077 139.998 4.00083 141.43 4.00083C142.287 4.00083 142.989 4.14155 143.536 4.42299C144.084 4.70443 144.505 5.08437 144.8 5.56282C145.108 6.02719 145.319 6.54082 145.431 7.1037C145.558 7.6525 145.635 8.20131 145.663 8.75012L142.694 9.19338C142.666 8.67272 142.617 8.21538 142.546 7.82137C142.49 7.42735 142.364 7.11777 142.167 6.89262C141.985 6.66747 141.704 6.55489 141.325 6.55489C140.918 6.55489 140.616 6.70968 140.419 7.01927C140.223 7.31478 140.125 7.64547 140.125 8.01134C140.125 8.61643 140.258 9.11599 140.525 9.51C140.805 9.88995 141.185 10.291 141.662 10.7132L143.389 12.2329C144.105 12.8521 144.715 13.5627 145.221 14.3648C145.74 15.1529 146 16.1309 146 17.2988C146 18.1009 145.817 18.8256 145.452 19.473C145.087 20.1203 144.575 20.6269 143.915 20.9927C143.269 21.3586 142.504 21.5415 141.62 21.5415Z",
+      fill: "#605F5F"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+      d: "M13.2792 12.0055L11.6562 11.1222L17.3845 8.00452L13.4276 5.72091L7.68769 9.03353L6.26677 8.21349L4.98035e-07 11.8302L1.55244e-07 19.6692L13.2792 12.0055Z",
+      fill: "#605F5F"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+      d: "M14.096 12.4501L1.15188e-07 20.5852L0 23.2193C0 25.3567 2.3147 26.6926 4.16646 25.6239L21.8739 15.4045C23.7257 14.3359 23.7257 11.6641 21.8739 10.5955L21.2642 10.2436L15.653 13.2975L14.096 12.4501Z",
+      fill: "#605F5F"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_1__.jsx)("path", {
+      d: "M3.91846 6.85824L5.47316 7.75548L5.38092e-07 10.9142L8.9376e-07 2.78067C9.87225e-07 0.643293 2.3147 -0.69256 4.16647 0.376128L9.65838 3.54562L3.91846 6.85824Z",
+      fill: "#605F5F"
+    })]
   });
 }
 
@@ -4541,6 +8211,169 @@ function Input(_ref) {
     })
   });
 }
+
+/***/ }),
+
+/***/ "./resources/js/Components/Keyboard.js":
+/*!*********************************************!*\
+  !*** ./resources/js/Components/Keyboard.js ***!
+  \*********************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   "default": () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+/* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
+/* harmony import */ var _tonaljs_tonal__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @tonaljs/tonal */ "./node_modules/@tonaljs/tonal/dist/index.es.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+function _typeof(obj) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (obj) { return typeof obj; } : function (obj) { return obj && "function" == typeof Symbol && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }, _typeof(obj); }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); Object.defineProperty(Constructor, "prototype", { writable: false }); return Constructor; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function"); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, writable: true, configurable: true } }); Object.defineProperty(subClass, "prototype", { writable: false }); if (superClass) _setPrototypeOf(subClass, superClass); }
+
+function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf ? Object.setPrototypeOf.bind() : function _setPrototypeOf(o, p) { o.__proto__ = p; return o; }; return _setPrototypeOf(o, p); }
+
+function _createSuper(Derived) { var hasNativeReflectConstruct = _isNativeReflectConstruct(); return function _createSuperInternal() { var Super = _getPrototypeOf(Derived), result; if (hasNativeReflectConstruct) { var NewTarget = _getPrototypeOf(this).constructor; result = Reflect.construct(Super, arguments, NewTarget); } else { result = Super.apply(this, arguments); } return _possibleConstructorReturn(this, result); }; }
+
+function _possibleConstructorReturn(self, call) { if (call && (_typeof(call) === "object" || typeof call === "function")) { return call; } else if (call !== void 0) { throw new TypeError("Derived constructors may only return object or undefined"); } return _assertThisInitialized(self); }
+
+function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
+
+function _isNativeReflectConstruct() { if (typeof Reflect === "undefined" || !Reflect.construct) return false; if (Reflect.construct.sham) return false; if (typeof Proxy === "function") return true; try { Boolean.prototype.valueOf.call(Reflect.construct(Boolean, [], function () {})); return true; } catch (e) { return false; } }
+
+function _getPrototypeOf(o) { _getPrototypeOf = Object.setPrototypeOf ? Object.getPrototypeOf.bind() : function _getPrototypeOf(o) { return o.__proto__ || Object.getPrototypeOf(o); }; return _getPrototypeOf(o); }
+
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && iter[Symbol.iterator] != null || iter["@@iterator"] != null) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+
+
+
+
+
+
+function setNotes() {
+  var chromaticC2 = _tonaljs_tonal__WEBPACK_IMPORTED_MODULE_1__.Scale.get('C4 chromatic');
+  var chromaticC3 = _tonaljs_tonal__WEBPACK_IMPORTED_MODULE_1__.Scale.get('C5 chromatic');
+  var notes = [].concat(_toConsumableArray(chromaticC2.notes), _toConsumableArray(chromaticC3.notes));
+  return notes.map(function (note) {
+    return {
+      note: note,
+      type: note.includes('b') || note.includes('#') ? 'semi' : 'natural'
+    };
+  });
+}
+
+;
+
+var Keyboard = /*#__PURE__*/function (_React$Component) {
+  _inherits(Keyboard, _React$Component);
+
+  var _super = _createSuper(Keyboard);
+
+  function Keyboard(props) {
+    var _this;
+
+    _classCallCheck(this, Keyboard);
+
+    _this = _super.call(this, props);
+    _this.state = {
+      notes: setNotes()
+    };
+    return _this;
+  }
+
+  _createClass(Keyboard, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      console.log(this.state);
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this2 = this;
+
+      return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.Fragment, {
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+          className: "col-span-8",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+            className: "relative sm:mx-auto",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+              className: "relative mx-auto p-4 bg-white shadow-md sm:rounded-lg",
+              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+                className: "flex",
+                children: this.state.notes.map(function (note, index) {
+                  return note.type === 'natural' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
+                    className: "h-80 w-20 pb-2 mx-1 shadow-md rounded-b-lg relative flex items-end justify-center cursor-pointer",
+                    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
+                      "class": "text-gray-400 text-xs font-bold",
+                      children: note.note
+                    }), _this2.state.notes[index + 1] && _this2.state.notes[index + 1].type === 'semi' ? /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+                      className: "h-40 w-16 pb-2 mx-1 shadow-md rounded-b-lg absolute z-10 top-0 -right-10 bg-gray-600 flex items-end justify-center cursor-pointer",
+                      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
+                        className: "text-white text-xs font-bold",
+                        children: _this2.state.notes[index + 1].note
+                      })
+                    }) : '']
+                  }) : '';
+                })
+              })
+            })
+          })
+        })
+      });
+    }
+  }]);
+
+  return Keyboard;
+}(react__WEBPACK_IMPORTED_MODULE_0__.Component);
+
+;
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (Keyboard);
+/*
+<div
+    v-for="(note, index) in notes"
+    :key="note.note"
+    class="w-auto"
+>
+    <template v-if="note.type === 'natural'">
+        <div
+            class="h-80 w-20 pb-2 mx-1 shadow-md rounded-b-lg relative flex items-end justify-center cursor-pointer"
+            @mousedown.stop="handlePressPianoKey(note.note)"
+        >
+            <span class="text-gray-400 text-xs font-bold">{{note.note}}</span>
+            <template v-if="notes[index + 1]">
+                <div
+                    v-if="notes[index + 1].type === 'semi'"
+                    class="h-40 w-16 pb-2 mx-1 shadow-md rounded-b-lg absolute z-10 top-0 -right-10 bg-gray-600 flex items-end justify-center cursor-pointer"
+                    @mousedown.stop="handlePressPianoKey(notes[index + 1].note)"
+                >
+                    <span class="text-white text-xs font-bold">{{notes[index + 1].note}}</span>
+                </div>
+            </template>
+        </div>
+    </template>
+</div>
+
+</div>
+
+*/
 
 /***/ }),
 
@@ -4880,20 +8713,63 @@ __webpack_require__.r(__webpack_exports__);
 
 
 
+
 function Guest(_ref) {
   var children = _ref.children;
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
-    className: "min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100",
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_2__.Link, {
-        href: "/",
-        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_Components_ApplicationLogo__WEBPACK_IMPORTED_MODULE_1__["default"], {
-          className: "w-20 h-20 fill-current text-gray-500"
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.Fragment, {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+      className: "h-screen w-full",
+      children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("nav", {
+        className: "h-12 w-full",
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+          className: "container min-h-full px-2 mx-auto xl flex justify-start items-center",
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_2__.Link, {
+            href: "/",
+            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)(_Components_ApplicationLogo__WEBPACK_IMPORTED_MODULE_1__["default"], {
+              className: "fill-current"
+            })
+          })
         })
+      }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("section", {
+        className: "w-full h-full -mt-12",
+        children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+          className: "container h-full px-2 mx-auto xl flex items-center justify-center",
+          children: children
+        })
+      })]
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("section", {
+      className: "w-full h-64 bg-gradient-to-r from-cyan-500 to-blue-500"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("footer", {
+      className: "w-full h-16 bg-slate-900",
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+        className: "container min-h-full px-2 mx-auto xl flex justify-between items-center text-xs",
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("p", {
+            className: "text-gray-400",
+            children: "\xA9 Puschords 2022"
+          })
+        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsxs)("div", {
+          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("a", {
+            href: "/",
+            className: "text-gray-400 hover:underline",
+            children: "Terms & condition"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+            className: "text-gray-400 px-2",
+            children: "|"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("a", {
+            href: "/",
+            className: "text-gray-400 hover:underline",
+            children: "About"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("span", {
+            className: "text-gray-400 px-2",
+            children: "|"
+          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("a", {
+            href: "/",
+            className: "text-gray-400 hover:underline",
+            children: "Contact"
+          })]
+        })]
       })
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_3__.jsx)("div", {
-      className: "w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg",
-      children: children
     })]
   });
 }
@@ -5582,198 +9458,20 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ });
 /* harmony import */ var react__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! react */ "./node_modules/react/index.js");
 /* harmony import */ var _inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @inertiajs/inertia-react */ "./node_modules/@inertiajs/inertia-react/dist/index.js");
-/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+/* harmony import */ var _Layouts_Guest__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @/Layouts/Guest */ "./resources/js/Layouts/Guest.js");
+/* harmony import */ var _Components_Keyboard__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @/Components/Keyboard */ "./resources/js/Components/Keyboard.js");
+/* harmony import */ var react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! react/jsx-runtime */ "./node_modules/react/jsx-runtime.js");
+
 
 
 
 
 
 function Welcome(props) {
-  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.Fragment, {
-    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.Head, {
-      title: "Welcome"
-    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-      className: "relative flex items-top justify-center min-h-screen bg-gray-100 dark:bg-gray-900 sm:items-center sm:pt-0",
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-        className: "max-w-6xl mx-auto sm:px-6 lg:px-8",
-        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-          className: "flex justify-center pt-8 sm:justify-start sm:pt-0",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("svg", {
-            viewBox: "0 0 651 192",
-            fill: "none",
-            xmlns: "http://www.w3.org/2000/svg",
-            className: "h-16 w-auto text-gray-700 sm:h-20",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("g", {
-              clipPath: "url(#clip0)",
-              fill: "#EF3B2D",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("path", {
-                d: "M248.032 44.676h-16.466v100.23h47.394v-14.748h-30.928V44.676zM337.091 87.202c-2.101-3.341-5.083-5.965-8.949-7.875-3.865-1.909-7.756-2.864-11.669-2.864-5.062 0-9.69.931-13.89 2.792-4.201 1.861-7.804 4.417-10.811 7.661-3.007 3.246-5.347 6.993-7.016 11.239-1.672 4.249-2.506 8.713-2.506 13.389 0 4.774.834 9.26 2.506 13.459 1.669 4.202 4.009 7.925 7.016 11.169 3.007 3.246 6.609 5.799 10.811 7.66 4.199 1.861 8.828 2.792 13.89 2.792 3.913 0 7.804-.955 11.669-2.863 3.866-1.908 6.849-4.533 8.949-7.875v9.021h15.607V78.182h-15.607v9.02zm-1.431 32.503c-.955 2.578-2.291 4.821-4.009 6.73-1.719 1.91-3.795 3.437-6.229 4.582-2.435 1.146-5.133 1.718-8.091 1.718-2.96 0-5.633-.572-8.019-1.718-2.387-1.146-4.438-2.672-6.156-4.582-1.719-1.909-3.032-4.152-3.938-6.73-.909-2.577-1.36-5.298-1.36-8.161 0-2.864.451-5.585 1.36-8.162.905-2.577 2.219-4.819 3.938-6.729 1.718-1.908 3.77-3.437 6.156-4.582 2.386-1.146 5.059-1.718 8.019-1.718 2.958 0 5.656.572 8.091 1.718 2.434 1.146 4.51 2.674 6.229 4.582 1.718 1.91 3.054 4.152 4.009 6.729.953 2.577 1.432 5.298 1.432 8.162-.001 2.863-.479 5.584-1.432 8.161zM463.954 87.202c-2.101-3.341-5.083-5.965-8.949-7.875-3.865-1.909-7.756-2.864-11.669-2.864-5.062 0-9.69.931-13.89 2.792-4.201 1.861-7.804 4.417-10.811 7.661-3.007 3.246-5.347 6.993-7.016 11.239-1.672 4.249-2.506 8.713-2.506 13.389 0 4.774.834 9.26 2.506 13.459 1.669 4.202 4.009 7.925 7.016 11.169 3.007 3.246 6.609 5.799 10.811 7.66 4.199 1.861 8.828 2.792 13.89 2.792 3.913 0 7.804-.955 11.669-2.863 3.866-1.908 6.849-4.533 8.949-7.875v9.021h15.607V78.182h-15.607v9.02zm-1.432 32.503c-.955 2.578-2.291 4.821-4.009 6.73-1.719 1.91-3.795 3.437-6.229 4.582-2.435 1.146-5.133 1.718-8.091 1.718-2.96 0-5.633-.572-8.019-1.718-2.387-1.146-4.438-2.672-6.156-4.582-1.719-1.909-3.032-4.152-3.938-6.73-.909-2.577-1.36-5.298-1.36-8.161 0-2.864.451-5.585 1.36-8.162.905-2.577 2.219-4.819 3.938-6.729 1.718-1.908 3.77-3.437 6.156-4.582 2.386-1.146 5.059-1.718 8.019-1.718 2.958 0 5.656.572 8.091 1.718 2.434 1.146 4.51 2.674 6.229 4.582 1.718 1.91 3.054 4.152 4.009 6.729.953 2.577 1.432 5.298 1.432 8.162 0 2.863-.479 5.584-1.432 8.161zM650.772 44.676h-15.606v100.23h15.606V44.676zM365.013 144.906h15.607V93.538h26.776V78.182h-42.383v66.724zM542.133 78.182l-19.616 51.096-19.616-51.096h-15.808l25.617 66.724h19.614l25.617-66.724h-15.808zM591.98 76.466c-19.112 0-34.239 15.706-34.239 35.079 0 21.416 14.641 35.079 36.239 35.079 12.088 0 19.806-4.622 29.234-14.688l-10.544-8.158c-.006.008-7.958 10.449-19.832 10.449-13.802 0-19.612-11.127-19.612-16.884h51.777c2.72-22.043-11.772-40.877-33.023-40.877zm-18.713 29.28c.12-1.284 1.917-16.884 18.589-16.884 16.671 0 18.697 15.598 18.813 16.884h-37.402zM184.068 43.892c-.024-.088-.073-.165-.104-.25-.058-.157-.108-.316-.191-.46-.056-.097-.137-.176-.203-.265-.087-.117-.161-.242-.265-.345-.085-.086-.194-.148-.29-.223-.109-.085-.206-.182-.327-.252l-.002-.001-.002-.002-35.648-20.524a2.971 2.971 0 00-2.964 0l-35.647 20.522-.002.002-.002.001c-.121.07-.219.167-.327.252-.096.075-.205.138-.29.223-.103.103-.178.228-.265.345-.066.089-.147.169-.203.265-.083.144-.133.304-.191.46-.031.085-.08.162-.104.25-.067.249-.103.51-.103.776v38.979l-29.706 17.103V24.493a3 3 0 00-.103-.776c-.024-.088-.073-.165-.104-.25-.058-.157-.108-.316-.191-.46-.056-.097-.137-.176-.203-.265-.087-.117-.161-.242-.265-.345-.085-.086-.194-.148-.29-.223-.109-.085-.206-.182-.327-.252l-.002-.001-.002-.002L40.098 1.396a2.971 2.971 0 00-2.964 0L1.487 21.919l-.002.002-.002.001c-.121.07-.219.167-.327.252-.096.075-.205.138-.29.223-.103.103-.178.228-.265.345-.066.089-.147.169-.203.265-.083.144-.133.304-.191.46-.031.085-.08.162-.104.25-.067.249-.103.51-.103.776v122.09c0 1.063.568 2.044 1.489 2.575l71.293 41.045c.156.089.324.143.49.202.078.028.15.074.23.095a2.98 2.98 0 001.524 0c.069-.018.132-.059.2-.083.176-.061.354-.119.519-.214l71.293-41.045a2.971 2.971 0 001.489-2.575v-38.979l34.158-19.666a2.971 2.971 0 001.489-2.575V44.666a3.075 3.075 0 00-.106-.774zM74.255 143.167l-29.648-16.779 31.136-17.926.001-.001 34.164-19.669 29.674 17.084-21.772 12.428-43.555 24.863zm68.329-76.259v33.841l-12.475-7.182-17.231-9.92V49.806l12.475 7.182 17.231 9.92zm2.97-39.335l29.693 17.095-29.693 17.095-29.693-17.095 29.693-17.095zM54.06 114.089l-12.475 7.182V46.733l17.231-9.92 12.475-7.182v74.537l-17.231 9.921zM38.614 7.398l29.693 17.095-29.693 17.095L8.921 24.493 38.614 7.398zM5.938 29.632l12.475 7.182 17.231 9.92v79.676l.001.005-.001.006c0 .114.032.221.045.333.017.146.021.294.059.434l.002.007c.032.117.094.222.14.334.051.124.088.255.156.371a.036.036 0 00.004.009c.061.105.149.191.222.288.081.105.149.22.244.314l.008.01c.084.083.19.142.284.215.106.083.202.178.32.247l.013.005.011.008 34.139 19.321v34.175L5.939 144.867V29.632h-.001zm136.646 115.235l-65.352 37.625V148.31l48.399-27.628 16.953-9.677v33.862zm35.646-61.22l-29.706 17.102V66.908l17.231-9.92 12.475-7.182v33.841z"
-              })
-            })
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-          className: "mt-8 bg-white dark:bg-gray-800 overflow-hidden shadow sm:rounded-lg",
-          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-            className: "grid grid-cols-1 md:grid-cols-2",
-            children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-              className: "p-6",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-                className: "flex items-center",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("svg", {
-                  fill: "none",
-                  stroke: "currentColor",
-                  strokeLinecap: "round",
-                  strokeLinejoin: "round",
-                  strokeWidth: "2",
-                  viewBox: "0 0 24 24",
-                  className: "w-8 h-8 text-gray-500",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("path", {
-                    d: "M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-                  })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-                  className: "ml-4 text-lg leading-7 font-semibold",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("a", {
-                    href: "https://laravel.com/docs",
-                    className: "underline text-gray-900 dark:text-white",
-                    children: "Documentation"
-                  })
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-                className: "ml-12",
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-                  className: "mt-2 text-gray-600 dark:text-gray-400 text-sm",
-                  children: "Laravel has wonderful, thorough documentation covering every aspect of the framework. Whether you are new to the framework or have previous experience with Laravel, we recommend reading all of the documentation from beginning to end."
-                })
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-              className: "p-6 border-t border-gray-200 dark:border-gray-700 md:border-t-0 md:border-l",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-                className: "flex items-center",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("svg", {
-                  fill: "none",
-                  stroke: "currentColor",
-                  strokeLinecap: "round",
-                  strokeLinejoin: "round",
-                  strokeWidth: "2",
-                  viewBox: "0 0 24 24",
-                  className: "w-8 h-8 text-gray-500",
-                  children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("path", {
-                    d: "M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"
-                  }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("path", {
-                    d: "M15 13a3 3 0 11-6 0 3 3 0 016 0z"
-                  })]
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-                  className: "ml-4 text-lg leading-7 font-semibold",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("a", {
-                    href: "https://laracasts.com",
-                    className: "underline text-gray-900 dark:text-white",
-                    children: "Laracasts"
-                  })
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-                className: "ml-12",
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-                  className: "mt-2 text-gray-600 dark:text-gray-400 text-sm",
-                  children: "Laracasts offers thousands of video tutorials on Laravel, PHP, and JavaScript development. Check them out, see for yourself, and massively level up your development skills in the process."
-                })
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-              className: "p-6 border-t border-gray-200 dark:border-gray-700",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-                className: "flex items-center",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("svg", {
-                  fill: "none",
-                  stroke: "currentColor",
-                  strokeLinecap: "round",
-                  strokeLinejoin: "round",
-                  strokeWidth: "2",
-                  viewBox: "0 0 24 24",
-                  className: "w-8 h-8 text-gray-500",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("path", {
-                    d: "M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"
-                  })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-                  className: "ml-4 text-lg leading-7 font-semibold",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("a", {
-                    href: "https://laravel-news.com/",
-                    className: "underline text-gray-900 dark:text-white",
-                    children: "Laravel News"
-                  })
-                })]
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-                className: "ml-12",
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-                  className: "mt-2 text-gray-600 dark:text-gray-400 text-sm",
-                  children: "Laravel News is a community driven portal and newsletter aggregating all of the latest and most important news in the Laravel ecosystem, including new package releases and tutorials."
-                })
-              })]
-            }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-              className: "p-6 border-t border-gray-200 dark:border-gray-700 md:border-l",
-              children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-                className: "flex items-center",
-                children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("svg", {
-                  fill: "none",
-                  stroke: "currentColor",
-                  strokeLinecap: "round",
-                  strokeLinejoin: "round",
-                  strokeWidth: "2",
-                  viewBox: "0 0 24 24",
-                  className: "w-8 h-8 text-gray-500",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("path", {
-                    d: "M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                  })
-                }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-                  className: "ml-4 text-lg leading-7 font-semibold text-gray-900 dark:text-white",
-                  children: "Vibrant Ecosystem"
-                })]
-              })
-            })]
-          })
-        }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-          className: "flex justify-center mt-4 sm:items-center sm:justify-between",
-          children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-            className: "text-center text-sm text-gray-500 sm:text-left",
-            children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-              className: "flex items-center",
-              children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("svg", {
-                fill: "none",
-                strokeLinecap: "round",
-                strokeLinejoin: "round",
-                strokeWidth: "2",
-                viewBox: "0 0 24 24",
-                stroke: "currentColor",
-                className: "-mt-px w-5 h-5 text-gray-400",
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("path", {
-                  d: "M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                })
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("a", {
-                href: "https://laravel.bigcartel.com",
-                className: "ml-1 underline",
-                children: "Shop"
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("svg", {
-                fill: "none",
-                stroke: "currentColor",
-                strokeLinecap: "round",
-                strokeLinejoin: "round",
-                strokeWidth: "2",
-                viewBox: "0 0 24 24",
-                className: "ml-4 -mt-px w-5 h-5 text-gray-400",
-                children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("path", {
-                  d: "M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-                })
-              }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("a", {
-                href: "https://github.com/sponsors/taylorotwell",
-                className: "ml-1 underline",
-                children: "Sponsor"
-              })]
-            })
-          }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
-            className: "ml-4 text-center text-sm text-gray-500 sm:text-right sm:ml-0",
-            children: ["Laravel v", props.laravelVersion, " (PHP v", props.phpVersion, ")"]
-          })]
-        })]
-      })
-    })]
+  return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsxs)(_Layouts_Guest__WEBPACK_IMPORTED_MODULE_2__["default"], {
+    children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_inertiajs_inertia_react__WEBPACK_IMPORTED_MODULE_1__.Head, {
+      title: "Home"
+    }), /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_4__.jsx)(_Components_Keyboard__WEBPACK_IMPORTED_MODULE_3__["default"], {})]
   });
 }
 
