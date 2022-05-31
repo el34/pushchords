@@ -31,7 +31,7 @@ class Keyboard extends React.Component {
             <>
                  <div className="col-span-8">
                      <div className="relative sm:mx-auto">
-                         <div className="relative mx-auto p-4 bg-white shadow-md sm:rounded-lg">
+                         <div className="relative mx-auto p-4 bg-white shadow-xl sm:rounded-lg">
                              <div className="flex">
                                  {this.state.notes.map((note, index) => {
                                      return (

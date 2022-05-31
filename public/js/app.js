@@ -8315,7 +8315,7 @@ var Keyboard = /*#__PURE__*/function (_React$Component) {
           children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
             className: "relative sm:mx-auto",
             children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-              className: "relative mx-auto p-4 bg-white shadow-md sm:rounded-lg",
+              className: "relative mx-auto p-4 bg-white shadow-xl sm:rounded-lg",
               children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
                 className: "flex",
                 children: this.state.notes.map(function (note, index) {
