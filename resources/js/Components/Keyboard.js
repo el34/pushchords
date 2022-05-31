@@ -57,32 +57,3 @@ class Keyboard extends React.Component {
 };
 
 export default Keyboard;
-
-/*
-<div
-    v-for="(note, index) in notes"
-    :key="note.note"
-    class="w-auto"
->
-    <template v-if="note.type === 'natural'">
-        <div
-            class="h-80 w-20 pb-2 mx-1 shadow-md rounded-b-lg relative flex items-end justify-center cursor-pointer"
-            @mousedown.stop="handlePressPianoKey(note.note)"
-        >
-            <span class="text-gray-400 text-xs font-bold">{{note.note}}</span>
-            <template v-if="notes[index + 1]">
-                <div
-                    v-if="notes[index + 1].type === 'semi'"
-                    class="h-40 w-16 pb-2 mx-1 shadow-md rounded-b-lg absolute z-10 top-0 -right-10 bg-gray-600 flex items-end justify-center cursor-pointer"
-                    @mousedown.stop="handlePressPianoKey(notes[index + 1].note)"
-                >
-                    <span class="text-white text-xs font-bold">{{notes[index + 1].note}}</span>
-                </div>
-            </template>
-        </div>
-    </template>
-</div>
-
-</div>
-
-*/
