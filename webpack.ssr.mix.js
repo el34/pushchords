@@ -11,4 +11,7 @@ mix.options({ manifest: false })
     .webpackConfig({
         target: 'node',
         externals: [webpackNodeExternals()],
+        experiments: {
+            topLevelAwait: true
+        },
     });

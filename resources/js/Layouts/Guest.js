@@ -5,7 +5,7 @@ import { Link } from '@inertiajs/inertia-react';
 export default function Guest({ children }) {
     return (
         <>
-            <div className="h-screen w-full">
+            <div className="h-screen w-full bg-slate-100">
                 <nav className="h-12 w-full">
                     <div className="container min-h-full px-2 mx-auto xl flex justify-start items-center">
                         <Link href="/">
