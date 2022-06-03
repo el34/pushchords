@@ -2,14 +2,20 @@ import { React, useState } from "react";
 import { PlayIcon, PauseIcon } from '@heroicons/react/solid';
 import { getScaleOnScaleChange, useScaleContext } from '@/Context/ScalesContext';
 import KeyboardControlsScaleSelect from '@/Components/KeyboardControlsScaleSelect';
+import KeyboardControlsToneRadioSelect from '@/Components/KeyboardControlsToneRadioSelect';
 
 export default function KeyboardControls(props) {
     const {scales, setScales} = useScaleContext();
     const [playerStatus, setPlayerStatus] = useState('paused');
 
-    function handleScaleChange(selected) {
-        let newKeyboardNotes = getScaleOnScaleChange(selected, scales);
-        setScales({...scales, keyboardNotes: newKeyboardNotes});
+    function handleScaleChange(currentScale, currentTone) {
+        let newKeyboardNotes = getScaleOnScaleChange(currentScale, scales, currentTone);
+        setScales({...scales, keyboardNotes: newKeyboardNotes, currentScaleType: currentScale});
+    }
+
+    function handleRadioToneChange(currentScale, currentTone) {
+        let newKeyboardNotes = getScaleOnScaleChange(currentScale, scales, currentTone);
+        setScales({...scales, keyboardNotes: newKeyboardNotes, currentToneName: currentTone});
     }
 
     const handlePlayerClick = (event) => {
@@ -24,7 +30,7 @@ export default function KeyboardControls(props) {
         <div className="col-span-8">
              <div className="w-full h-28 p-4 bg-white shadow-xl rounded-t-lg">
                  <div className="flex">
-                    <div className="col-span-4 flex justify-center items-center">
+                    <div className="col-span-2 flex justify-center items-center">
                         <a className="" onClick={handlePlayerClick}>
                             {
                                 playerStatus === 'playing' 
@@ -33,8 +39,11 @@ export default function KeyboardControls(props) {
                             }
                         </a>
                     </div>
-                    <div className="col-span-6">
+                    <div className="col-span-4">
                         <KeyboardControlsScaleSelect handleScaleChange={handleScaleChange} />
+                    </div>
+                    <div className="col-span-4">
+                        <KeyboardControlsToneRadioSelect handleRadioToneChange={handleRadioToneChange}/>
                     </div>
                  </div>
              </div>

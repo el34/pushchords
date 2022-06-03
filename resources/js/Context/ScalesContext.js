@@ -1,34 +1,36 @@
 import React, { useState, createContext, useContext } from 'react';
-import { Scale } from '@tonaljs/tonal';
+import { Note, Scale } from '@tonaljs/tonal';
 
 export const getScales = () => {
     return Scale.names().map(scale => {return {name: scale}});
-
 }
 
 export const getNotes = () => {
     let chromaticC2 = Scale.get('C4 chromatic');
     let chromaticC3 = Scale.get('C5 chromatic');
     let notes = [...chromaticC2.notes, ...chromaticC3.notes];
-    return notes.map((note) => {
+
+    return notes.map((note, index) => {
+        let isSemitone = note.includes('b') || note.includes('#');
         return {
-            name: note,
-            type:
-                note.includes('b') || note.includes('#')
-                    ? 'semi'
-                    : 'natural',
-        };
+            name: isSemitone ? {diminish: note, augmented: notes[index - 1].split('').join('#')} : note,
+            type: isSemitone ? 'semi' : 'natural',
+        }; 
     });
 }
 
 export const getScaleOnScaleChange = (selectedScale, scales, noteName = 'c4') => {
-    console.log(scales)
     let currentScale = Scale.get(`${noteName} ${selectedScale}`);
+    console.log(currentScale);
 
     let newKeyboardNotes = scales.keyboardNotes.map(note => {
         return {
             ...note,
-            isActive: currentScale.notes.some(item => item === note.name)
+            isActive: currentScale.notes.some(item => 
+                Note.simplify(item) === Note.simplify(note.name) || 
+                Note.simplify(item) === Note.simplify(note.name.augmented) || 
+                Note.simplify(item) === Note.simplify(note.name.diminish)
+            )
         }
     });
 
@@ -38,9 +40,12 @@ export const getScaleOnScaleChange = (selectedScale, scales, noteName = 'c4') =>
 export const ScalesContext = createContext();
 
 export const ScalesProvider = (props) => {
+    let scaleTypes = getScales();
     let stateObj = {
-        types: getScales(),
-        keyboardNotes: getNotes()
+        types: scaleTypes,
+        keyboardNotes: getNotes(),
+        currentScaleType: scaleTypes[0].name,
+        currentToneName: 'c4'
     };
 
     const [scales, setScales] = useState(stateObj);
