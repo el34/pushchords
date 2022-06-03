@@ -1,14 +1,20 @@
 import { React, Fragment, useState, useEffect } from "react";
 import { PlayIcon, PauseIcon, CheckIcon, SelectorIcon } from '@heroicons/react/solid';
-import { Listbox, Transition } from '@headlessui/react'
+import { Listbox, Transition } from '@headlessui/react';
+import { getScaleOnScaleChange, useScaleContext } from '@/Context/ScalesContext';
 
 export default function KeyboardControls(props) {
-    const scales = props.scales;
+    const {scales, setScales} = useScaleContext();
     const [playerStatus, setPlayerStatus] = useState('paused');
-    const [selected, setSelected] = useState(scales[0]);
+    const [selected, setSelected] = useState(scales.types[0].name);
+
+    function handleScaleChange(selected) {
+        let newKeyboardNotes = getScaleOnScaleChange(selected, scales);
+        setScales({...scales, keyboardNotes: newKeyboardNotes});
+    }
 
     useEffect(() => {
-        props.handleScaleChange(selected);
+        handleScaleChange(selected);
     }, [selected]);
 
     const handlePlayerClick = (event) => {
@@ -37,7 +43,7 @@ export default function KeyboardControls(props) {
                             <Listbox value={selected} onChange={setSelected}>
                                 <div className="relative mt-1">
                                 <Listbox.Button className="relative w-full cursor-pointer rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
-                                    <span className="block truncate">{selected.name}</span>
+                                    <span className="block truncate">{selected}</span>
                                     <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                                     <SelectorIcon
                                         className="h-5 w-5 text-gray-400"
@@ -52,7 +58,7 @@ export default function KeyboardControls(props) {
                                     leaveTo="opacity-0"
                                 >
                                     <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                                    {scales.map((scale, index) => (
+                                    {scales.types.map((scale, index) => (
                                         <Listbox.Option
                                         key={index}
                                         className={({ active }) =>
@@ -60,7 +66,7 @@ export default function KeyboardControls(props) {
                                             active ? 'bg-amber-100 text-amber-900' : 'text-gray-900'
                                             }`
                                         }
-                                        value={scale}
+                                        value={scale.name}
                                         >
                                         {({ selected }) => (
                                             <>
