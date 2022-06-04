@@ -9,7 +9,7 @@ export default function Guest({ children }) {
                 <nav className="h-12 w-full">
                     <div className="container min-h-full px-2 mx-auto xl flex justify-start items-center">
                         <Link href="/">
-                            <ApplicationLogo className="fill-current" />
+                            <ApplicationLogo className="fill-current w-48" />
                         </Link>
                     </div>
                 </nav>

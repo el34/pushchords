@@ -19,11 +19,11 @@ export default function KeyboardControlsToneRadioSelect(props) {
     }
 
     return (
-        <div className="w-72 flex">
+        <div className="flex">
             <RadioGroup value={selected} onChange={setSelected}>
                 <div className="flex">
                     <button className={`
-                            mx-1 relative flex cursor-pointer rounded-md w-12 h-8 shadow-md focus:outline-none text-m items-center justify-center
+                            mr-1 relative flex cursor-pointer rounded-md w-12 h-8 shadow-md focus:outline-none text-m items-center justify-center
                             ${halfTone ?
                                 'text-cyan-300 bg-cyan-900' : 'text-cyan-600 hover:bg-cyan-400 border-2 border-cyan-400'
                             }
