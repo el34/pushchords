@@ -8520,6 +8520,7 @@ function _arrayWithHoles(arr) { if (Array.isArray(arr)) return arr; }
 
 
 
+
 var tones = ["c", "d", "e", "f", "g", "a", "b"];
 function KeyboardControlsToneRadioSelect(props) {
   var _useScaleContext = (0,_Context_ScalesContext__WEBPACK_IMPORTED_MODULE_1__.useScaleContext)(),
@@ -8531,17 +8532,35 @@ function KeyboardControlsToneRadioSelect(props) {
       selected = _useState2[0],
       setSelected = _useState2[1];
 
+  var _useState3 = (0,react__WEBPACK_IMPORTED_MODULE_0__.useState)(false),
+      _useState4 = _slicedToArray(_useState3, 2),
+      halfTone = _useState4[0],
+      setHalfTone = _useState4[1];
+
   (0,react__WEBPACK_IMPORTED_MODULE_0__.useEffect)(function () {
-    props.handleRadioToneChange(scales.currentScaleType, "".concat(selected, "4"));
-  }, [selected]);
+    var selectedTone = halfTone ? "".concat(selected, "#4") : "".concat(selected, "4");
+    props.handleRadioToneChange(scales.currentScaleType, selectedTone);
+  }, [selected, halfTone]);
+
+  function handleAugmentedOrDiminishedButtonClick() {
+    halfTone ? setHalfTone(false) : setHalfTone(true);
+  }
+
   return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
     className: "w-72 flex",
     children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_headlessui_react__WEBPACK_IMPORTED_MODULE_3__.RadioGroup, {
       value: selected,
       onChange: setSelected,
-      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
+      children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsxs)("div", {
         className: "flex",
-        children: tones.map(function (tone) {
+        children: [/*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("button", {
+          className: "\n                            mx-1 relative flex cursor-pointer rounded-md w-12 h-8 shadow-md focus:outline-none text-m items-center justify-center\n                            ".concat(halfTone ? 'text-cyan-300 bg-cyan-900' : 'text-cyan-600 hover:bg-cyan-400 border-2 border-cyan-400', "\n                            "),
+          onClick: handleAugmentedOrDiminishedButtonClick,
+          children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("span", {
+            className: "font-medium uppercase",
+            children: "#"
+          })
+        }), tones.map(function (tone) {
           return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_headlessui_react__WEBPACK_IMPORTED_MODULE_3__.RadioGroup.Option, {
             value: tone,
             className: function className(_ref) {
@@ -8554,20 +8573,17 @@ function KeyboardControlsToneRadioSelect(props) {
                   checked = _ref2.checked;
               return /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.Fragment, {
                 children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-                  className: "w-full h-full",
-                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)("div", {
-                    className: "text-sm flex w-full h-full items-center justify-center",
-                    children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_headlessui_react__WEBPACK_IMPORTED_MODULE_3__.RadioGroup.Label, {
-                      as: "p",
-                      className: "font-medium uppercase ".concat(checked ? "text-amber-900" : "hover:text-amber-900"),
-                      children: tone
-                    })
+                  className: "text-sm flex w-full h-full items-center justify-center",
+                  children: /*#__PURE__*/(0,react_jsx_runtime__WEBPACK_IMPORTED_MODULE_2__.jsx)(_headlessui_react__WEBPACK_IMPORTED_MODULE_3__.RadioGroup.Label, {
+                    as: "p",
+                    className: "font-medium uppercase ".concat(checked ? "text-amber-900" : "hover:text-amber-900"),
+                    children: tone
                   })
                 })
               });
             }
           }, tone);
-        })
+        })]
       })
     })
   });
