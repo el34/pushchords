@@ -20,9 +20,6 @@ export default function Guest({ children }) {
                     </div>
                 </section>
             </div>
-            <section className="w-full h-64 bg-gradient-to-r from-cyan-500 to-blue-500">
-
-            </section>
             <footer className="w-full h-16 bg-slate-900">
                 <div className="container min-h-full px-2 mx-auto xl flex justify-between items-center text-xs">
                     <div>
