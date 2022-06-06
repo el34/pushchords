@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from "react";
 import { useScaleContext } from "@/Context/ScalesContext";
 import { RadioGroup } from "@headlessui/react";
+import { usePlayerContext } from "@/Context/PlayerContext";
 
 const tones = ["c", "d", "e", "f", "g", "a", "b"];
 
 export default function KeyboardControlsToneRadioSelect(props) {
     const { scales, setScales } = useScaleContext();
+    const {player, setPlayer} = usePlayerContext();
     const [selected, setSelected] = useState(tones[0]);
     const [halfTone, setHalfTone] = useState(false);
 
     useEffect(() => {
         let selectedTone = halfTone ? `${selected}#4` : `${selected}4`;
         props.handleRadioToneChange(scales.currentScaleType, selectedTone);
+        setPlayer({isPlaying: false})
     }, [selected, halfTone]);
 
     function handleAugmentedOrDiminishedButtonClick() {

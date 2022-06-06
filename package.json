@@ -38,6 +38,7 @@
     },
     "dependencies": {
         "@heroicons/react": "^1.0.6",
-        "@tonaljs/tonal": "^4.6.5"
+        "@tonaljs/tonal": "^4.6.5",
+        "tone": "^14.7.77"
     }
 }

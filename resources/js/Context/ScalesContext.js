@@ -1,4 +1,4 @@
-import React, { useState, createContext, useContext } from 'react';
+import React, { useState, createContext, useContext, useEffect } from 'react';
 import { Note, Scale } from '@tonaljs/tonal';
 
 export const getScales = () => {
@@ -26,7 +26,7 @@ export const getScaleOnScaleChange = (selectedScale, scales, noteName = 'c4') =>
     let newKeyboardNotes = scales.keyboardNotes.map(note => {
         return {
             ...note,
-            isActive: currentScale.notes.some(item => 
+            isInScale: currentScale.notes.some(item => 
                 Note.simplify(item) === Note.simplify(note.name) || 
                 Note.simplify(item) === Note.simplify(note.name.augmented) || 
                 Note.simplify(item) === Note.simplify(note.name.diminish)
@@ -34,7 +34,7 @@ export const getScaleOnScaleChange = (selectedScale, scales, noteName = 'c4') =>
         }
     });
 
-    return newKeyboardNotes;
+    return { newKeyboardNotes, scaleNotes: currentScale.notes.map(note => Note.simplify(note)) };
 }
 
 export const ScalesContext = createContext();
@@ -49,6 +49,10 @@ export const ScalesProvider = (props) => {
     };
 
     const [scales, setScales] = useState(stateObj);
+
+    useEffect(() => {
+       console.log(scales);
+    }, [scales]);
 
     return (
         <ScalesContext.Provider value={{scales, setScales}}>

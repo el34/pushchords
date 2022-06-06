@@ -1,30 +1,28 @@
 import { React, useState } from "react";
 import { PlayIcon, PauseIcon } from '@heroicons/react/solid';
 import { getScaleOnScaleChange, useScaleContext } from '@/Context/ScalesContext';
+import { usePlayerContext } from '@/Context/PlayerContext';
 import KeyboardControlsScaleSelect from '@/Components/KeyboardControlsScaleSelect';
 import KeyboardControlsToneRadioSelect from '@/Components/KeyboardControlsToneRadioSelect';
 import KeyboardControlsDisplay from "./KeyboardControlsDisplay";
 
 export default function KeyboardControls(props) {
     const {scales, setScales} = useScaleContext();
-    const [playerStatus, setPlayerStatus] = useState('paused');
+    const {player, setPlayer} = usePlayerContext();
 
     function handleScaleChange(currentScale, currentTone) {
-        let newKeyboardNotes = getScaleOnScaleChange(currentScale, scales, currentTone);
-        setScales({...scales, keyboardNotes: newKeyboardNotes, currentScaleType: currentScale});
+        let newKeyboardNotesObj = getScaleOnScaleChange(currentScale, scales, currentTone);
+        setScales({...scales, keyboardNotes: newKeyboardNotesObj.newKeyboardNotes, currentScaleType: currentScale, scaleNotes: newKeyboardNotesObj.scaleNotes});
     }
 
     function handleRadioToneChange(currentScale, currentTone) {
-        let newKeyboardNotes = getScaleOnScaleChange(currentScale, scales, currentTone);
-        setScales({...scales, keyboardNotes: newKeyboardNotes, currentToneName: currentTone});
+        let newKeyboardNotesObj = getScaleOnScaleChange(currentScale, scales, currentTone);
+        setScales({...scales, keyboardNotes: newKeyboardNotesObj.newKeyboardNotes, currentToneName: currentTone, scaleNotes: newKeyboardNotesObj.scaleNotes});
     }
 
     const handlePlayerClick = (event) => {
         event.preventDefault();
-        playerStatus === 'paused' ? setPlayerStatus('playing') : setPlayerStatus('paused');
-        setTimeout(() => {
-            console.log(playerStatus);
-        }, 2000)
+        player.isPlaying ? setPlayer({isPlaying: false}) : setPlayer({isPlaying: true});
     }
 
     return (
@@ -34,7 +32,7 @@ export default function KeyboardControls(props) {
                     <div className="flex justify-start items-center">
                         <a className="" onClick={handlePlayerClick}>
                             {
-                                playerStatus === 'playing' 
+                                player.isPlaying
                                     ? <PauseIcon className="h-20 w-20 text-red-400 cursor-pointer"/> 
                                     : <PlayIcon className="h-20 w-20 text-green-400 cursor-pointer"/>
                             }
