@@ -20,7 +20,7 @@ export const handlePlayToneOnKeyboardClick = (tone) => {
 }
 
 Tone.loaded().then((response) => {
-
+    Tone.start();
 })
 
 export const PlayerContext = createContext();
@@ -67,7 +67,10 @@ export const PlayerProvider = (props) => {
 
     useEffect(() => {
         if(mountRef.current) {
+            Tone.start();
             handlePlayScale();
+        } else {
+            Tone.start();
         }
         mountRef.current = true;
     }, [player]);

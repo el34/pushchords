@@ -21,7 +21,7 @@ export const getNotes = () => {
 
 export const getScaleOnScaleChange = (selectedScale, scales, noteName = 'c4') => {
     let currentScale = Scale.get(`${noteName} ${selectedScale}`);
-    console.log(currentScale);
+    //console.log(currentScale);
 
     let newKeyboardNotes = scales.keyboardNotes.map(note => {
         return {
@@ -51,7 +51,7 @@ export const ScalesProvider = (props) => {
     const [scales, setScales] = useState(stateObj);
 
     useEffect(() => {
-       console.log(scales);
+       //console.log(scales);
     }, [scales]);
 
     return (
