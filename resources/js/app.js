@@ -5,7 +5,7 @@ import { render } from 'react-dom';
 import { createInertiaApp } from '@inertiajs/inertia-react';
 import { InertiaProgress } from '@inertiajs/progress';
 import { ScalesProvider } from '@/Context/ScalesContext';
-import { PlayerContext, PlayerProvider } from './Context/PlayerContext';
+import { PlayerProvider } from './Context/PlayerContext';
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 

@@ -9,7 +9,7 @@ export default function Guest({ children }) {
                 <nav className="h-12 w-full">
                     <div className="container min-h-full px-2 mx-auto xl flex justify-start items-center">
                         <Link href="/">
-                            <ApplicationLogo className="fill-current w-48" />
+                            <ApplicationLogo className="w-36 md:w-48" />
                         </Link>
                     </div>
                 </nav>
@@ -20,17 +20,17 @@ export default function Guest({ children }) {
                     </div>
                 </section>
             </div>
-            <footer className="w-full h-16 bg-slate-900">
-                <div className="container min-h-full px-2 mx-auto xl flex justify-between items-center text-xs">
+            <footer className="w-full py-4 md:py-0 md:h-16 bg-slate-900">
+                <div className="container min-h-full px-2 mx-auto xl flex flex-col md:flex-row justify-center md:justify-between items-center text-xs">
                     <div>
                         <p className="text-gray-400">© Puschords 2022</p>
                     </div>
-                    <div>
-                        <a href="/" className="text-gray-400 hover:underline">Terms & condition</a>
-                        <span className="text-gray-400 px-2">|</span>
-                        <a href="/" className="text-gray-400 hover:underline">About</a>
-                        <span className="text-gray-400 px-2">|</span>
-                        <a href="/" className="text-gray-400 hover:underline">Contact</a>
+                    <div class="flex flex-col md:flex-row text-center md:text-left">
+                        <a href="/" className="text-gray-400 hover:underline pt-2 md:pt-0">Terms & condition</a>
+                        <span className="text-gray-400 px-2 hidden md:inline-block">|</span>
+                        <a href="/" className="text-gray-400 hover:underline pt-2 md:pt-0">About</a>
+                        <span className="text-gray-400 px-2 hidden md:inline-block">|</span>
+                        <a href="/" className="text-gray-400 hover:underline pt-2 md:pt-0">Contact</a>
                     </div>
                 </div>
             </footer>
