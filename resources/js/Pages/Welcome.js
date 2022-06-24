@@ -12,8 +12,7 @@ export default function Welcome(props) {
         <Guest>
             <Head title="Home" />
             <div>
-                <KeyboardControls scales={scales.types}/>
-                <Keyboard notes={scales.keyboardNotes}/>
+                HomePage
             </div>
         </Guest>
     );
