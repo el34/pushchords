@@ -1,14 +1,18 @@
-import { React, Fragment, useState, useEffect } from "react";
+import { React, Fragment, useState, useEffect, useRef } from "react";
 import { CheckIcon, SelectorIcon } from "@heroicons/react/solid";
 import { Listbox, Transition } from "@headlessui/react";
 import { useScaleContext } from "@/Context/ScalesContext";
 
 export default function KeyboardControlsScaleSelect(props) {
+    const initRef = useRef(false);
     const { scales, setScales } = useScaleContext();
     const [selected, setSelected] = useState(scales.types[0].name);
 
     useEffect(() => {
-        props.handleScaleChange(selected, scales.currentToneName);
+        if (initRef.current) {
+            props.handleScaleChange(selected, scales.currentToneName);
+        }
+        initRef.current = true;
     }, [selected]);
 
     return (

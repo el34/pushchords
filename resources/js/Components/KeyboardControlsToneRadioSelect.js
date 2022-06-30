@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useScaleContext } from "@/Context/ScalesContext";
 import { RadioGroup } from "@headlessui/react";
 import { usePlayerContext } from "@/Context/PlayerContext";
@@ -6,15 +6,19 @@ import { usePlayerContext } from "@/Context/PlayerContext";
 const tones = ["c", "d", "e", "f", "g", "a", "b"];
 
 export default function KeyboardControlsToneRadioSelect(props) {
+    const initRef = useRef(false);
     const { scales, setScales } = useScaleContext();
     const {player, setPlayer} = usePlayerContext();
-    const [selected, setSelected] = useState(tones[0]);
-    const [halfTone, setHalfTone] = useState(false);
+    const [selected, setSelected] = useState(scales.currentToneName.charAt(0));
+    const [halfTone, setHalfTone] = useState(scales.currentToneName.includes('#'));
 
     useEffect(() => {
-        let selectedTone = halfTone ? `${selected}#4` : `${selected}4`;
-        props.handleRadioToneChange(scales.currentScaleType, selectedTone);
-        setPlayer({isPlaying: false})
+        if (initRef.current) {
+            let selectedTone = halfTone ? `${selected}#4` : `${selected}4`;
+            props.handleRadioToneChange(scales.currentScaleType, selectedTone);
+            setPlayer({isPlaying: false})
+        }
+        initRef.current = true;
     }, [selected, halfTone]);
 
     function handleAugmentedOrDiminishedButtonClick() {

@@ -15,7 +15,26 @@
         <link rel="stylesheet" href="{{ mix('css/app.css') }}">
 
         <!-- Scripts -->
+        @env ('production')
+            <!-- Google Analytics -->
+            <script async src="https://www.googletagmanager.com/gtag/js?id=G-VK9P9F9NZL"></script>
+            <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('consent', 'default', {
+                    'ad_storage': 'denied',
+                    'analytics_storage': 'denied'
+                });
+                gtag('js', new Date());
+                gtag('config', 'G-VK9P9F9NZL');
+
+            </script>
+            <!-- End Google Analytics -->
+        @endenv
         @routes
+        <script>
+            const pushchords = {appEnv: "{{env('APP_ENV')}}", gaTrackId: "{{env('GOOGLE_ANALYTICS_TRACKID')}}"}
+        </script>
         <script src="{{ mix('js/app.js') }}" defer></script>
         @inertiaHead
     </head>

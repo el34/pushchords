@@ -1,8 +1,10 @@
-import React from 'react';
+import { React, useEffect } from 'react';
 import ApplicationLogo from '@/Components/ApplicationLogo';
 import { Link } from '@inertiajs/inertia-react';
+import { CookieBar } from '@/Components/CookieBar';
 
 export default function Guest({ children }) {
+    console.log('init')
     return (
         <>
             <div className="h-screen w-full bg-slate-100">
@@ -25,7 +27,7 @@ export default function Guest({ children }) {
                     <div>
                         <p className="text-gray-400">© Puschords 2022</p>
                     </div>
-                    <div class="flex flex-col md:flex-row text-center md:text-left">
+                    <div className="flex flex-col md:flex-row text-center md:text-left">
                         <a href="/" className="text-gray-400 hover:underline pt-2 md:pt-0">Terms & condition</a>
                         <span className="text-gray-400 px-2 hidden md:inline-block">|</span>
                         <a href="/" className="text-gray-400 hover:underline pt-2 md:pt-0">About</a>
@@ -34,6 +36,7 @@ export default function Guest({ children }) {
                     </div>
                 </div>
             </footer>
+            <CookieBar />
         </>
     );
 }

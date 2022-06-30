@@ -15,7 +15,7 @@ export const getNotes = () => {
         return {
             name: isSemitone ? {diminish: note, augmented: notes[index - 1].split('').join('#')} : note,
             type: isSemitone ? 'semi' : 'natural',
-        }; 
+        };
     });
 }
 
@@ -26,9 +26,9 @@ export const getScaleOnScaleChange = (selectedScale, scales, noteName = 'c4') =>
     let newKeyboardNotes = scales.keyboardNotes.map(note => {
         return {
             ...note,
-            isInScale: currentScale.notes.some(item => 
-                Note.simplify(item) === Note.simplify(note.name) || 
-                Note.simplify(item) === Note.simplify(note.name.augmented) || 
+            isInScale: currentScale.notes.some(item =>
+                Note.simplify(item) === Note.simplify(note.name) ||
+                Note.simplify(item) === Note.simplify(note.name.augmented) ||
                 Note.simplify(item) === Note.simplify(note.name.diminish)
             )
         }
@@ -41,12 +41,20 @@ export const ScalesContext = createContext();
 
 export const ScalesProvider = (props) => {
     let scaleTypes = getScales();
+    let currentScaleType = scaleTypes[0].name;
+    //console.log(scaleTypes)
     let stateObj = {
         types: scaleTypes,
         keyboardNotes: getNotes(),
-        currentScaleType: scaleTypes[0].name,
-        currentToneName: 'c4'
+        currentScaleType: currentScaleType,
+        currentToneName: 'c4',
+        scaleNotes: null
     };
+
+    let initScaleObj = getScaleOnScaleChange(currentScaleType, stateObj);
+
+    stateObj.keyboardNotes = initScaleObj.newKeyboardNotes;
+    stateObj.scaleNotes = initScaleObj.scaleNotes;
 
     const [scales, setScales] = useState(stateObj);
 

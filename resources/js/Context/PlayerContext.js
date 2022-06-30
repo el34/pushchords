@@ -19,7 +19,7 @@ export const handlePlayToneOnKeyboardClick = (tone) => {
     sampler.triggerAttackRelease(tone, "8n");
 }
 
-Tone.loaded().then((response) => {
+Tone.loaded().then(() => {
     Tone.start();
 })
 
@@ -48,7 +48,6 @@ export const PlayerProvider = (props) => {
         playingRef.current = true;
             pattern = new Tone.Pattern((time, note) => {
                 sampler.triggerAttackRelease(note, 0.7, time);
-                console.log(note);
                 setPlayedNoteToState(note);
 
                 if (note === scales.scaleNotes[scales.scaleNotes.length - 1]) {
@@ -69,8 +68,6 @@ export const PlayerProvider = (props) => {
         if(mountRef.current) {
             Tone.start();
             handlePlayScale();
-        } else {
-            Tone.start();
         }
         mountRef.current = true;
     }, [player]);

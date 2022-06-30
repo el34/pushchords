@@ -12,12 +12,22 @@ export default function KeyboardControls(props) {
 
     function handleScaleChange(currentScale, currentTone) {
         let newKeyboardNotesObj = getScaleOnScaleChange(currentScale, scales, currentTone);
-        setScales({...scales, keyboardNotes: newKeyboardNotesObj.newKeyboardNotes, currentScaleType: currentScale, scaleNotes: newKeyboardNotesObj.scaleNotes});
+        setScales({
+            ...scales,
+            keyboardNotes: newKeyboardNotesObj.newKeyboardNotes,
+            currentScaleType: currentScale,
+            scaleNotes: newKeyboardNotesObj.scaleNotes
+        });
     }
 
     function handleRadioToneChange(currentScale, currentTone) {
         let newKeyboardNotesObj = getScaleOnScaleChange(currentScale, scales, currentTone);
-        setScales({...scales, keyboardNotes: newKeyboardNotesObj.newKeyboardNotes, currentToneName: currentTone, scaleNotes: newKeyboardNotesObj.scaleNotes});
+        setScales({
+            ...scales,
+            keyboardNotes: newKeyboardNotesObj.newKeyboardNotes,
+            currentToneName: currentTone,
+            scaleNotes: newKeyboardNotesObj.scaleNotes
+        });
     }
 
     const handlePlayerClick = (event) => {
@@ -33,7 +43,7 @@ export default function KeyboardControls(props) {
                         <a className="" onClick={handlePlayerClick}>
                             {
                                 player.isPlaying
-                                    ? <PauseIcon className="h-20 w-20 text-red-400 cursor-pointer"/> 
+                                    ? <PauseIcon className="h-20 w-20 text-red-400 cursor-pointer"/>
                                     : <PlayIcon className="h-20 w-20 text-green-400 cursor-pointer"/>
                             }
                         </a>
@@ -48,7 +58,7 @@ export default function KeyboardControls(props) {
                         <KeyboardControlsDisplay />
                     </div>
                     <div className="col-span-1">
-                        
+
                     </div>
                  </div>
              </div>
