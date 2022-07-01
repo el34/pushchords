@@ -1,4 +1,4 @@
-import { React, useState } from "react";
+import React from "react";
 import { PlayIcon, PauseIcon } from '@heroicons/react/solid';
 import { getScaleOnScaleChange, useScaleContext } from '@/Context/ScalesContext';
 import { usePlayerContext } from '@/Context/PlayerContext';
@@ -37,7 +37,7 @@ export default function KeyboardControls(props) {
 
     return (
         <div className="col-span-8">
-             <div className="w-full h-28 p-4 bg-white shadow-xl rounded-t-lg">
+             <div className="w-full h-28 p-4 bg-white shadow-xl rounded-tr-lg">
                  <div className="grid grid-cols-10">
                     <div className="flex justify-start items-center">
                         <a className="" onClick={handlePlayerClick}>
