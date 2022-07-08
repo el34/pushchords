@@ -2,7 +2,12 @@ import React, { useState, createContext, useContext, useEffect } from 'react';
 import { Note, Scale } from '@tonaljs/tonal';
 
 export const getScales = () => {
-    return Scale.names().map(scale => {return {name: scale}});
+    let types = Scale.names().map(scale => {return {name: scale}});
+    types = types.sort((a, b) => a.name.toLowerCase() > b.name.toLowerCase() ? 1 : -1);
+    types = types.sort((a, b) => a.name.toLowerCase().includes('major') ? 1 : -1);
+    types = types.sort((a, b) => b.name.toLowerCase().includes('minor') ? 1 : -1);
+
+    return types;
 }
 
 export const getNotes = () => {
@@ -40,7 +45,7 @@ export const ScalesContext = createContext();
 
 export const ScalesProvider = (props) => {
     let scaleTypes = getScales();
-    let currentScaleType = scaleTypes[0].name;
+    let currentScaleType = scaleTypes[17].name;
 
     let stateObj = {
         types: scaleTypes,

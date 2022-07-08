@@ -16,6 +16,10 @@ const sampler = new Tone.Sampler({
 	baseUrl: "https://tonejs.github.io/audio/salamander/",
 }).toDestination();
 
+export const handleToneDispose = (selector) => {
+    selector && selector.dispose();
+}
+
 export const handlePlayToneOnKeyboardClick = (tone) => {
     sampler.triggerAttackRelease(tone, "8n");
 }
@@ -34,28 +38,37 @@ export const PlayerProvider = (props) => {
     const {scales, setScales} = useScaleContext();
     const {chords, setChords} = useChordsContext();
 
-    function handlePlayScale() {
-        if (playingRef.current) {
-            Tone.Transport.stop();
-            pattern && pattern.dispose()
+    function handleStopPlayer(selectors) {
+        Tone.Transport.stop();
+        console.log(selectors, typeof selectors)
+        selectors.forEach(selector => {
+            handleToneDispose(selector);
+        });
+        setPlayer({...player, isPlaying: false});
+
+        if (player.type === 'scale') {
             setTimeout(() => {
                 setPlayedNote({name: false});
             }, 1000);
+        } else {
+            setPlayedNote({name: false});
         }
-        if (!player.isPlaying) return;
-        playingRef.current = true;
+
+        playingRef.current = false;
+
+        pattern = null; chordEvent = null;
+    }
+
+    function handlePlayScale() {
         pattern = new Tone.Pattern((time, note) => {
             sampler.triggerAttackRelease(note, 0.7, time);
             setPlayedNote({name: note});
 
             if (note === scales.scaleNotes[scales.scaleNotes.length - 1]) {
-                Tone.Transport.stop();
-                pattern && pattern.dispose()
-                setPlayer({...player, isPlaying: false});
+                handleStopPlayer([pattern]);
                 setTimeout(() => {
                     setPlayedNote({name: false});
                 }, time + 1000);
-                playingRef.current = false;
             }
         }, scales.scaleNotes, "up");
         Tone.Transport.start();
@@ -63,22 +76,12 @@ export const PlayerProvider = (props) => {
     }
 
     function handlePlayChord() {
-        if (playingRef.current) {
-            Tone.Transport.stop();
-            chordEvent && chordEvent.dispose()
-            setTimeout(() => {
-                setPlayedNote({name: false});
-            }, 1000);
-        }
-        if (!player.isPlaying) return;
-        playingRef.current = true;
         chordEvent = new Tone.ToneEvent(((time, chord) => {
             setPlayedNote({name: chord});
             sampler.triggerAttackRelease(chord, 1.5, time);
             setTimeout(() => {
-                setPlayer({...player, isPlaying: false});
+                handleStopPlayer([chordEvent]);
                 setPlayedNote({name: false});
-                playingRef.current = false;
             }, 1500);
         }), chords.chordNotes);
         Tone.Transport.start();
@@ -88,11 +91,16 @@ export const PlayerProvider = (props) => {
     useEffect(() => {
         if(mountRef.current) {
             Tone.start();
-            player.type === 'scale' ? handlePlayScale() : handlePlayChord();
+            if (playingRef.current) {
+                if (!player.isPlaying) {
+                    handleStopPlayer([pattern, chordEvent])
+                }
+            } else if (!playingRef.current && player.isPlaying) {
+                playingRef.current = true;
+                player.type === 'scale' ? handlePlayScale() : handlePlayChord();
+            }
         }
         mountRef.current = true;
-        console.log(player)
-        console.log(playedNote)
     }, [player]);
 
     return (

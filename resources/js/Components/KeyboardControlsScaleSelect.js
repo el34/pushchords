@@ -3,11 +3,13 @@ import { CheckIcon, SelectorIcon } from "@heroicons/react/solid";
 import { Listbox, Transition } from "@headlessui/react";
 import { useScaleContext } from "@/Context/ScalesContext";
 import { useChordsContext } from "@/Context/ChordsContext";
+import { usePlayerContext } from "@/Context/PlayerContext";
 import { usePage } from "@inertiajs/inertia-react";
 
 export default function KeyboardControlsScaleSelect(props) {
     const { url } = usePage();
     const initRef = useRef(false);
+    const {player, setPlayer} = usePlayerContext();
     const { scales } = useScaleContext();
     const { chords } = useChordsContext();
     let initType, types;
@@ -26,7 +28,8 @@ export default function KeyboardControlsScaleSelect(props) {
         if (initRef.current) {
             url === '/scales'
                 ? props.handleScaleChange(selected, scales.currentToneName)
-                : props.handleChordChange(selected, chords.currentToneName)
+                : props.handleChordChange(selected, chords.currentToneName);
+            setPlayer({...player, isPlaying: false})
         }
         initRef.current = true;
     }, [selected]);
