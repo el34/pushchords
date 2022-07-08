@@ -2,15 +2,31 @@ import { React, Fragment, useState, useEffect, useRef } from "react";
 import { CheckIcon, SelectorIcon } from "@heroicons/react/solid";
 import { Listbox, Transition } from "@headlessui/react";
 import { useScaleContext } from "@/Context/ScalesContext";
+import { useChordsContext } from "@/Context/ChordsContext";
+import { usePage } from "@inertiajs/inertia-react";
 
 export default function KeyboardControlsScaleSelect(props) {
+    const { url } = usePage();
     const initRef = useRef(false);
-    const { scales, setScales } = useScaleContext();
-    const [selected, setSelected] = useState(scales.types[0].name);
+    const { scales } = useScaleContext();
+    const { chords } = useChordsContext();
+    let initType, types;
+
+    if (url === '/scales') {
+        initType = scales.currentScaleType;
+        types = scales.types;
+    } else {
+        initType = chords.currentChordType;
+        types = chords.types;
+    }
+
+    const [selected, setSelected] = useState(initType);
 
     useEffect(() => {
         if (initRef.current) {
-            props.handleScaleChange(selected, scales.currentToneName);
+            url === '/scales'
+                ? props.handleScaleChange(selected, scales.currentToneName)
+                : props.handleChordChange(selected, chords.currentToneName)
         }
         initRef.current = true;
     }, [selected]);
@@ -20,7 +36,13 @@ export default function KeyboardControlsScaleSelect(props) {
             <Listbox value={selected} onChange={setSelected}>
                 <div className="relative mt-1">
                     <Listbox.Button className="relative w-full cursor-pointer rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">
-                        <span className="block truncate text-slate-600">Choose your scale type</span>
+                        <span className="block truncate text-slate-600">
+                            {url === '/scales' ? (
+                                <span>Choose your scale type</span>
+                            ) : (
+                                <span>Choose your chord type</span>
+                            )}
+                        </span>
                         <span className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-2">
                             <SelectorIcon
                                 className="h-5 w-5 text-gray-400"
@@ -35,7 +57,7 @@ export default function KeyboardControlsScaleSelect(props) {
                         leaveTo="opacity-0"
                     >
                         <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                            {scales.types.map((scale, index) => (
+                            {types.map((scale, index) => (
                                 <Listbox.Option
                                     key={index}
                                     className={({ active }) =>

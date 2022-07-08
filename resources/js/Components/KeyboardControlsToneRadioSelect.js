@@ -2,21 +2,27 @@ import React, { useState, useEffect, useRef } from "react";
 import { useScaleContext } from "@/Context/ScalesContext";
 import { RadioGroup } from "@headlessui/react";
 import { usePlayerContext } from "@/Context/PlayerContext";
+import { useChordsContext } from "@/Context/ChordsContext";
+import { usePage } from "@inertiajs/inertia-react";
 
 const tones = ["c", "d", "e", "f", "g", "a", "b"];
 
 export default function KeyboardControlsToneRadioSelect(props) {
+    const { url } = usePage();
     const initRef = useRef(false);
-    const { scales, setScales } = useScaleContext();
+    const { scales } = useScaleContext();
+    const { chords } = useChordsContext();
     const {player, setPlayer} = usePlayerContext();
-    const [selected, setSelected] = useState(scales.currentToneName.charAt(0));
-    const [halfTone, setHalfTone] = useState(scales.currentToneName.includes('#'));
+    const [selected, setSelected] = useState(url === '/scales' ? scales.currentToneName.charAt(0) : chords.currentToneName.charAt(0));
+    const [halfTone, setHalfTone] = useState(url === '/scales' ? scales.currentToneName.includes('#') : chords.currentToneName.includes('#'));
 
     useEffect(() => {
         if (initRef.current) {
             let selectedTone = halfTone ? `${selected}#4` : `${selected}4`;
-            props.handleRadioToneChange(scales.currentScaleType, selectedTone);
-            setPlayer({isPlaying: false})
+            url === '/scales'
+                ? props.handleRadioToneChange(scales.currentScaleType, selectedTone)
+                : props.handleRadioToneChordsChange(chords.currentChordType, selectedTone)
+            setPlayer({...player, isPlaying: false})
         }
         initRef.current = true;
     }, [selected, halfTone]);

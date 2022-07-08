@@ -6,6 +6,7 @@ import { createInertiaApp } from '@inertiajs/inertia-react';
 import { InertiaProgress } from '@inertiajs/progress';
 import { ScalesProvider } from '@/Context/ScalesContext';
 import { PlayerProvider } from './Context/PlayerContext';
+import { ChordsProvider } from './Context/ChordsContext';
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 
@@ -19,9 +20,11 @@ createInertiaApp({
     setup({ el, App, props }) {
         return render(
             <ScalesProvider>
-                <PlayerProvider>
-                    <App {...props} />
-                </PlayerProvider>
+                <ChordsProvider>
+                    <PlayerProvider>
+                        <App {...props} />
+                    </PlayerProvider>
+                </ChordsProvider>
             </ScalesProvider>
         , el);
     },

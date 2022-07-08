@@ -2,12 +2,16 @@ import React from "react";
 import { PlayIcon, PauseIcon } from '@heroicons/react/solid';
 import { getScaleOnScaleChange, useScaleContext } from '@/Context/ScalesContext';
 import { usePlayerContext } from '@/Context/PlayerContext';
+import { getChordOnChordChange, useChordsContext } from "@/Context/ChordsContext";
 import KeyboardControlsScaleSelect from '@/Components/KeyboardControlsScaleSelect';
 import KeyboardControlsToneRadioSelect from '@/Components/KeyboardControlsToneRadioSelect';
 import KeyboardControlsDisplay from "./KeyboardControlsDisplay";
+import { usePage } from "@inertiajs/inertia-react";
 
 export default function KeyboardControls(props) {
+    const {url} = usePage();
     const {scales, setScales} = useScaleContext();
+    const {chords, setChords} = useChordsContext();
     const {player, setPlayer} = usePlayerContext();
 
     function handleScaleChange(currentScale, currentTone) {
@@ -30,9 +34,30 @@ export default function KeyboardControls(props) {
         });
     }
 
+    function handleChordChange(currentChord, currentTone) {
+        let newKeyboardNotesObj = getChordOnChordChange(currentChord, chords, currentTone);
+        setChords({
+            ...chords,
+            keyboardNotes: newKeyboardNotesObj.newKeyboardNotes,
+            currentChordType: currentChord,
+            chordNotes: newKeyboardNotesObj.chordNotes
+        });
+    }
+
+    function handleRadioToneChordsChange(currentChord, currentTone) {
+        let newKeyboardNotesObj = getChordOnChordChange(currentChord, chords, currentTone);
+        setChords({
+            ...chords,
+            keyboardNotes: newKeyboardNotesObj.newKeyboardNotes,
+            currentToneName: currentTone,
+            chordNotes: newKeyboardNotesObj.chordNotes
+        });
+    }
+
     const handlePlayerClick = (event) => {
         event.preventDefault();
-        player.isPlaying ? setPlayer({isPlaying: false}) : setPlayer({isPlaying: true});
+        let type = url === '/scales' ? 'scale' : 'chord'
+        player.isPlaying ? setPlayer({isPlaying: false, type: type}) : setPlayer({isPlaying: true, type: type});
     }
 
     return (
@@ -50,8 +75,8 @@ export default function KeyboardControls(props) {
                     </div>
                     <div className="col-span-4">
                         <div className="flex flex-col h-full justify-between justify-items-start">
-                            <KeyboardControlsToneRadioSelect handleRadioToneChange={handleRadioToneChange}/>
-                            <KeyboardControlsScaleSelect handleScaleChange={handleScaleChange} />
+                            <KeyboardControlsToneRadioSelect handleRadioToneChange={handleRadioToneChange} handleRadioToneChordsChange={handleRadioToneChordsChange}/>
+                            <KeyboardControlsScaleSelect handleScaleChange={handleScaleChange} handleChordChange={handleChordChange}/>
                         </div>
                     </div>
                     <div className="col-span-3">

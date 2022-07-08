@@ -21,12 +21,11 @@ export const getNotes = () => {
 
 export const getScaleOnScaleChange = (selectedScale, scales, noteName = 'c4') => {
     let currentScale = Scale.get(`${noteName} ${selectedScale}`);
-    //console.log(currentScale);
 
     let newKeyboardNotes = scales.keyboardNotes.map(note => {
         return {
             ...note,
-            isInScale: currentScale.notes.some(item =>
+            isHighlighted: currentScale.notes.some(item =>
                 Note.simplify(item) === Note.simplify(note.name) ||
                 Note.simplify(item) === Note.simplify(note.name.augmented) ||
                 Note.simplify(item) === Note.simplify(note.name.diminish)
@@ -42,7 +41,7 @@ export const ScalesContext = createContext();
 export const ScalesProvider = (props) => {
     let scaleTypes = getScales();
     let currentScaleType = scaleTypes[0].name;
-    //console.log(scaleTypes)
+
     let stateObj = {
         types: scaleTypes,
         keyboardNotes: getNotes(),
