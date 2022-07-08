@@ -2,6 +2,7 @@ require('./bootstrap');
 
 import React from 'react';
 import { render } from 'react-dom';
+import { disableReactDevTools } from '@fvilers/disable-react-devtools';
 import { createInertiaApp } from '@inertiajs/inertia-react';
 import { InertiaProgress } from '@inertiajs/progress';
 import { ScalesProvider } from '@/Context/ScalesContext';
@@ -10,10 +11,14 @@ import { ChordsProvider } from './Context/ChordsContext';
 
 const appName = window.document.getElementsByTagName('title')[0]?.innerText || 'Laravel';
 
+if (pushchords.appEnv === 'production') {
+    disableReactDevTools();
+}
+
 createInertiaApp({
     title: (title) => `${title} | ${appName}`,
     resolve: (name) => {
-        console.log(name)
+        //console.log(name)
         const page = import(`./Pages/${name}`)
         return page
     },

@@ -4,7 +4,7 @@ import { Link } from '@inertiajs/inertia-react';
 import { CookieBar } from '@/Components/CookieBar';
 
 export default function Guest({ children }) {
-    console.log('init')
+    //console.log('init')
     return (
         <>
             <div className="h-screen w-full bg-slate-100">
