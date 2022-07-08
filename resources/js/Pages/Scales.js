@@ -22,7 +22,7 @@ export default function Welcome(props) {
     return (
         <Guest>
             <Head title="Scales" />
-            <div>
+            <div className="w-full 2xl:w-fit">
                 <KeyboardNavigation />
                 <KeyboardControls scales={scales.types}/>
                 <Keyboard notes={scales.keyboardNotes}/>

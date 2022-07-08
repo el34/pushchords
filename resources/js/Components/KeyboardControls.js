@@ -61,32 +61,30 @@ export default function KeyboardControls(props) {
     }
 
     return (
-        <div className="col-span-8">
-             <div className="w-full h-28 p-4 bg-white shadow-xl rounded-tr-lg">
-                 <div className="grid grid-cols-10">
-                    <div className="flex justify-start items-center">
-                        <a className="" onClick={handlePlayerClick}>
-                            {
-                                player.isPlaying
-                                    ? <PauseIcon className="h-20 w-20 text-red-400 cursor-pointer"/>
-                                    : <PlayIcon className="h-20 w-20 text-green-400 cursor-pointer"/>
-                            }
-                        </a>
+        <div className="w-full lg:h-28 p-4 bg-white shadow-xl rounded-tr-lg">
+            <div className="flex flex-col lg:grid lg:grid-cols-10">
+                <div className="my-2 lg:my-0 flex justify-start items-center">
+                    <a className="" onClick={handlePlayerClick}>
+                        {
+                            player.isPlaying
+                                ? <PauseIcon className="w-16 h-16 lg:h-20 lg:w-20 text-red-400 cursor-pointer"/>
+                                : <PlayIcon className="w-16 h-16 lg:h-20 lg:w-20 text-green-400 cursor-pointer"/>
+                        }
+                    </a>
+                </div>
+                <div className="my-2 lg:my-0 lg:col-span-4">
+                    <div className="flex flex-col h-full justify-between justify-items-start">
+                        <KeyboardControlsToneRadioSelect handleRadioToneChange={handleRadioToneChange} handleRadioToneChordsChange={handleRadioToneChordsChange}/>
+                        <KeyboardControlsScaleSelect handleScaleChange={handleScaleChange} handleChordChange={handleChordChange}/>
                     </div>
-                    <div className="col-span-4">
-                        <div className="flex flex-col h-full justify-between justify-items-start">
-                            <KeyboardControlsToneRadioSelect handleRadioToneChange={handleRadioToneChange} handleRadioToneChordsChange={handleRadioToneChordsChange}/>
-                            <KeyboardControlsScaleSelect handleScaleChange={handleScaleChange} handleChordChange={handleChordChange}/>
-                        </div>
-                    </div>
-                    <div className="col-span-3">
-                        <KeyboardControlsDisplay />
-                    </div>
-                    <div className="col-span-1">
+                </div>
+                <div className="my-2 lg:my-0 lg:col-span-3">
+                    <KeyboardControlsDisplay />
+                </div>
+                <div className="lg:col-span-1">
 
-                    </div>
-                 </div>
-             </div>
+                </div>
+            </div>
         </div>
     )
 }

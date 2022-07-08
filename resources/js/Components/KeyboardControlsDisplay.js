@@ -9,7 +9,7 @@ export default function KeyboardControlsDisplay(props) {
     const { chords } = useChordsContext();
     return (
         <>
-            <div className="w-full h-full rounded-lg shadow-md border-2 border-slate-200 bg-slate-50 py-2 px-6 flex flex-col justify-center justify-items-center">
+            <div className="w-full h-full rounded-lg shadow-md border-2 border-slate-200 bg-slate-50 py-2 px-4 lg:px-6 flex flex-col justify-center justify-items-center">
                 <p className="text-slate-400 text-xs font-semibold">
                     {url === '/scales' ? (
                         <span>Selected Scale:</span>

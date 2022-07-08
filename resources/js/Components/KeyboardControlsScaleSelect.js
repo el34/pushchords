@@ -35,7 +35,7 @@ export default function KeyboardControlsScaleSelect(props) {
     }, [selected]);
 
     return (
-        <div className="relative w-72 z-30">
+        <div className="relative w-full lg:w-72 z-30">
             <Listbox value={selected} onChange={setSelected}>
                 <div className="relative mt-1">
                     <Listbox.Button className="relative w-full cursor-pointer rounded-lg bg-white py-2 pl-3 pr-10 text-left shadow-md focus:outline-none focus-visible:border-indigo-500 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75 focus-visible:ring-offset-2 focus-visible:ring-offset-orange-300 sm:text-sm">

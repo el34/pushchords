@@ -21,7 +21,7 @@ export default function Welcome(props) {
     return (
         <Guest>
             <Head title="Chords" />
-            <div>
+            <div className="w-full 2xl:w-fit">
                 <KeyboardNavigation />
                 <KeyboardControls scales={chords.types}/>
                 <Keyboard notes={chords.keyboardNotes}/>
