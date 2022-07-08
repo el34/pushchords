@@ -40,7 +40,6 @@ export const PlayerProvider = (props) => {
 
     function handleStopPlayer(selectors) {
         Tone.Transport.stop();
-        console.log(selectors, typeof selectors)
         selectors.forEach(selector => {
             handleToneDispose(selector);
         });

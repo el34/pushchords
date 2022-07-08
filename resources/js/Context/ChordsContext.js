@@ -47,7 +47,7 @@ export const ChordsProvider = (props) => {
     const [chords, setChords] = useState(stateObj);
 
     useEffect(() => {
-        console.log(chords);
+        //console.log(chords);
      }, [chords]);
     return (
         <ChordsContext.Provider value={{chords, setChords}}>
