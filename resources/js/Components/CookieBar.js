@@ -47,7 +47,7 @@ export const CookieBar = () => {
     return (
         <>
             {shown ? (
-                <div className="max-w-screen-lg fixed bg-white inset-x-5 p-5 bottom-6 ml-auto rounded-lg drop-shadow-2xl flex gap-4 flex-wrap md:flex-nowrap text-center md:text-left items-center justify-center md:justify-between">
+                <div className="max-w-screen-lg fixed z-40 bg-white inset-x-5 p-5 bottom-6 ml-auto rounded-lg drop-shadow-2xl flex gap-4 flex-wrap md:flex-nowrap text-center md:text-left items-center justify-center md:justify-between">
                     <div className="w-full">This website uses cookies to ensure you get the best experience on our website.
                         <a href="#" className="text-indigo-600 whitespace-nowrap  hover:underline">Learn more</a>
                     </div>
