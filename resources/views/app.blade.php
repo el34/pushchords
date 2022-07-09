@@ -3,8 +3,23 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="description" content="Music scales, chords and chords progression cheatsheet">
+        <meta name="keywords" content="music, music theory, music scale, music scales, piano, keyboard, piano scales, chord, chords, chords progressions, piano chords, guitar chords, daw, ableton, synth, synthwave">
+
+        <meta property="og:title" content="Pushchords" />
+        <meta property="og:description" content="Music scales, chords and chords progression cheatsheet" />
+        <meta property="og:url" content="https://pushchords.com" />
+        <meta property="og:image" content="{{asset('img/og/og-image.jpg')}}" />
 
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
+
+        <link rel="apple-touch-icon" sizes="180x180" href="{{asset('favico/apple-touch-icon.png')}}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{asset('favico/favicon-32x32.png')}}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{asset('favico/favicon-16x16.png')}}">
+        <link rel="manifest" href="{{asset('favico/site.webmanifest')}}">
+        <link rel="mask-icon" href="{{asset('favico/safari-pinned-tab.svg')}}" color="#5bbad5">
+        <meta name="msapplication-TileColor" content="#da532c">
+        <meta name="theme-color" content="#ffffff">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
